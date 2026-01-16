@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마피아42 클래식 - 시즌 1-2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { background-color: #1a1a1a; color: #e0e0e0; font-family: 'Pretendard', sans-serif; }
+        .card { background-color: #2d2d2d; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .btn { background-color: #4a4a4a; color: white; padding: 0.5rem 1rem; border-radius: 4px; transition: 0.2s; }
+        .btn:hover { background-color: #6a6a6a; }
+        .btn-primary { background-color: #d32f2f; }
+        .btn-primary:hover { background-color: #b71c1c; }
+        .log-entry { font-size: 0.9rem; border-bottom: 1px solid #3d3d3d; padding: 0.25rem 0; }
+        .role-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 0.5rem; }
+        .role-mafia { background-color: #c62828; }
+        .role-citizen { background-color: #2e7d32; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center text-red-600">Mafia 42 Classic</h1>
+
+        <!-- 로그인/대기실 -->
+        <div id="lobby-section" class="card">
+            <h2 class="text-xl mb-4">대기실</h2>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="name-input" placeholder="닉네임 입력" class="bg-gray-700 text-white p-2 rounded flex-1">
+                <button onclick="joinGame()" class="btn btn-primary">입장하기</button>
+            </div>
+            <div>
+                <h3 class="font-bold mb-2">접속자 목록</h3>
+                <ul id="player-list" class="list-disc pl-5">
+                    <!-- 플레이어 목록 동적 추가 -->
+                </ul>
+            </div>
+            <button onclick="startGame()" class="btn mt-4 w-full">게임 시작 (최소 4명)</button>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="game-section" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 상태창 -->
+                <div class="md:col-span-1">
+                    <div class="card">
+                        <h2 class="text-xl font-bold mb-2" id="state-text">낮 - 1일째</h2>
+                        <div id="my-role-container">
+                            <span id="my-role-badge" class="role-badge">직업 확인 중...</span>
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="font-bold">내 정보</h3>
+                            <p id="my-name"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="font-bold mb-2">게임 로그</h3>
+                        <div id="game-logs" class="h-48 overflow-y-auto">
+                            <!-- 로그 메시지 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 플레이어 목록 & 행동 -->
+                <div class="md:col-span-2">
+                    <div class="card h-full">
+                        <h3 class="text-xl font-bold mb-4">플레이어 목록</h3>
+                        <div id="action-players" class="grid grid-cols-2 gap-2">
+                            <!-- 플레이어 액션 버튼 -->
+                        </div>
+                        <div id="night-action-info" class="mt-4 text-center text-blue-400 hidden">
+                            밤 능력을 사용할 대상을 선택하세요.
+                        </div>
+                        <button id="end-night-btn" onclick="endNight()" class="btn btn-primary w-full mt-6 hidden">밤 결과 처리 (방장 전용)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:8000');
+        let myId = null;
+        let players = [];
+        let myRole = null;
+
+        socket.on('connect', () => {
+            myId = socket.id;
+            console.log('Connected:', myId);
+        });
+
+        socket.on('player_list', (data) => {
+            players = data;
+            const listEl = document.getElementById('player-list');
+            listEl.innerHTML = data.map(p => `<li>${p.name} ${p.id === socket.id ? '(나)' : ''}</li>`).join('');
+        });
+
+        socket.on('game_started', (data) => {
+            myRole = data.role;
+            document.getElementById('lobby-section').classList.add('hidden');
+            document.getElementById('game-section').classList.remove('hidden');
+            
+            const badge = document.getElementById('my-role-badge');
+            badge.innerText = myRole;
+            badge.className = 'role-badge ' + (['마피아', '스파이', '짐승인간'].includes(myRole) ? 'role-mafia' : 'role-citizen');
+            
+            updatePlayerActionList();
+        });
+
+        socket.on('game_info', (data) => {
+            document.getElementById('state-text').innerText = `${data.state} - ${data.day}일째`;
+            if (data.state === 'NIGHT') {
+                document.getElementById('night-action-info').classList.remove('hidden');
+                document.getElementById('end-night-btn').classList.remove('hidden'); // 실제로는 방장 체크 필요
+            } else {
+                document.getElementById('night-action-info').classList.add('hidden');
+                document.getElementById('end-night-btn').classList.add('hidden');
+            }
+        });
+
+        socket.on('morning_results', (data) => {
+            const logsEl = document.getElementById('game-logs');
+            data.logs.forEach(log => {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerText = log;
+                logsEl.prepend(entry);
+            });
+            alert("아침이 밝았습니다.\n" + (data.dead.length > 0 ? "사망자: " + data.dead.join(', ') : "지난밤 아무도 죽지 않았습니다."));
+        });
+
+        socket.on('game_over', (data) => {
+            alert("게임 종료! 승리 팀: " + data.winner);
+            location.reload();
+        });
+
+        function joinGame() {
+            const name = document.getElementById('name-input').value;
+            if (!name) return alert("닉네임을 입력하세요.");
+            socket.emit('join_game', { name });
+            document.getElementById('my-name').innerText = name;
+        }
+
+        function startGame() {
+            socket.emit('start_game');
+        }
+
+        function updatePlayerActionList() {
+            const container = document.getElementById('action-players');
+            container.innerHTML = players.map(p => `
+                <button onclick="useAbility('${p.id}')" class="btn text-left p-4">
+                    <span class="block font-bold">${p.name}</span>
+                    <span class="text-xs text-gray-400">${p.id === socket.id ? '자신' : ''}</span>
+                </button>
+            `).join('');
+        }
+
+        function useAbility(targetId) {
+            socket.emit('night_action', { target_id: targetId });
+            alert("능력을 사용했습니다.");
+        }
+
+        function endNight() {
+            socket.emit('process_night');
+        }
+    </script>
+</body>
+</html>
+
