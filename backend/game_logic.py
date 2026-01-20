@@ -92,35 +92,44 @@ class MafiaGame:
         num_players = len(player_ids)
         random.shuffle(player_ids)
         
-        # 마피아 팀 배정
+        assigned_roles = []
+        
+        # 1. 마피아 팀 배정
         mafia_team_size = max(1, num_players // 4)
-        mafia_team_roles = [Role.MAFIA] * mafia_team_size
+        assigned_roles.extend([Role.MAFIA] * mafia_team_size)
         
+        # 보조 직업 (5인 이상일 때)
         if num_players >= 5:
-            mafia_team_roles.append(random.choice([Role.SPY, Role.BEAST_MAN]))
-        
-        citizen_roles_pool = [
-            Role.POLICE, Role.DOCTOR, Role.SOLDIER, Role.POLITICIAN, 
-            Role.GANGSTER, Role.MEDIUM, Role.REPORTER, Role.DETECTIVE, Role.LOVERS
-        ]
-        
-        assigned_roles = mafia_team_roles
+            assigned_roles.append(random.choice([Role.SPY, Role.BEAST_MAN]))
+            
+        # 2. 시민 팀 - 연인 (인원수가 남고 확률적으로 2명 배정)
         remaining_count = num_players - len(assigned_roles)
+        if remaining_count >= 2 and random.random() < 0.3:
+            assigned_roles.extend([Role.LOVERS, Role.LOVERS])
+            remaining_count -= 2
+            
+        # 3. 필수 시민 (경찰, 의사)
+        special_pool = [Role.POLICE, Role.DOCTOR, Role.SOLDIER, Role.POLITICIAN, 
+                        Role.GANGSTER, Role.MEDIUM, Role.REPORTER, Role.DETECTIVE]
+        random.shuffle(special_pool)
         
-        available_citizen_roles = citizen_roles_pool.copy()
-        random.shuffle(available_citizen_roles)
-        
-        for i in range(remaining_count):
-            if available_citizen_roles:
-                assigned_roles.append(available_citizen_roles.pop())
+        for _ in range(remaining_count):
+            if special_pool:
+                assigned_roles.append(special_pool.pop())
             else:
-                assigned_roles.append(random.choice(citizen_roles_pool))
+                assigned_roles.append(Role.CITIZEN)
 
+        # 인원수가 딱 맞지 않는 경우를 대비해 셔플 및 자르기/채우기
+        random.shuffle(assigned_roles)
+        assigned_roles = assigned_roles[:num_players]
+        while len(assigned_roles) < num_players:
+            assigned_roles.append(Role.CITIZEN)
+        
         random.shuffle(assigned_roles)
         
         for i, pid in enumerate(player_ids):
             self.players[pid].role = assigned_roles[i]
-            self.players[pid].is_alive = True # 명시적으로 생존 상태 초기화
+            self.players[pid].is_alive = True
             self.players[pid].memos = {other_pid: "" for other_pid in player_ids}
 
     def process_night_actions(self):
@@ -175,13 +184,13 @@ class MafiaGame:
                         self.logs.append(f"의사가 누군가를 살려냈습니다.")
                     elif target_player.role == Role.SOLDIER and not target_player.is_bulletproof_used:
                         target_player.is_bulletproof_used = True
-                        self.logs.append(f"군인이 습격을 버텨냈습니다.")
+                        self.logs.append(f"군인인 {target_player.name}님이 습격을 버텨냈습니다!")
                     elif target_player.role == Role.BEAST_MAN:
                         self.logs.append(f"누군가 습격을 받았으나 멀쩡합니다.")
                     else:
                         target_player.is_alive = False
                         self.dead_last_night.append(target_player.name)
-                        self.logs.append(f"{target_player.name}님이 사망하셨습니다.")
+                        self.logs.append(f"{target_player.name}님이 사망하셨습니다. 그의 직업은 [{target_player.role.value}]였습니다.")
             
             # 4. 마피아 전멸 시 접선된 짐승인간의 공격
             if not live_mafias and bm_player and bm_player.is_contacted and beastman_target:
@@ -192,7 +201,7 @@ class MafiaGame:
                     else:
                         target_player.is_alive = False
                         self.dead_last_night.append(target_player.name)
-                        self.logs.append(f"{target_player.name}님이 사망하셨습니다.")
+                        self.logs.append(f"{target_player.name}님이 사망하셨습니다. 그의 직업은 [{target_player.role.value}]였습니다.")
 
             if not self.dead_last_night:
                 self.logs.append("조용하게 밤이 지나갔습니다.")
@@ -271,4 +280,11 @@ class MafiaGame:
             p.voted_for = None
             p.votes = 0
             p.is_judgement_yes = None
+
+    def has_night_ability(self, role: Role) -> bool:
+        """밤에 능동적으로 능력을 사용하는 직업인지 확인"""
+        return role in [
+            Role.MAFIA, Role.POLICE, Role.DOCTOR, Role.SPY, 
+            Role.BEAST_MAN, Role.GANGSTER, Role.DETECTIVE, Role.REPORTER
+        ]
 

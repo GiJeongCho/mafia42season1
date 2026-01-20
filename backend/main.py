@@ -104,8 +104,13 @@ async def start_game(sid, data):
     game.settings["start_state"] = data.get("start_state", "NIGHT")
     
     if game.start_game():
+        lovers_names = [p.name for p in game.players.values() if p.role == Role.LOVERS]
         for pid, p in game.players.items():
             await sio.emit("game_started", {"role": p.role.value}, room=pid)
+            if p.role == Role.LOVERS:
+                partner_name = next((name for name in lovers_names if name != p.name), None)
+                if partner_name:
+                    await sio.emit("receive_chat", {"sender": "시스템", "message": f"당신의 연인은 [{partner_name}]님입니다.", "type": "lovers"}, room=pid)
         
         # 초기 타이머 설정
         if game.state == GameState.NIGHT:
@@ -197,7 +202,7 @@ async def process_judgement_results(room_id):
             await sio.emit("system_message", {"message": f"{nominee.name}님은 정치인의 권력으로 처형되지 않았습니다!"}, room=room_id)
         else:
             nominee.is_alive = False
-            await sio.emit("system_message", {"message": f"{nominee.name}님이 처형되었습니다."}, room=room_id)
+            await sio.emit("system_message", {"message": f"{nominee.name}님이 처형되었습니다. 그의 직업은 [{nominee.role.value}]였습니다."}, room=room_id)
             await broadcast_player_list(room_id)
     else:
         await sio.emit("system_message", {"message": "찬성 표가 부족하여 처형되지 않았습니다."}, room=room_id)
