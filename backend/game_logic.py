@@ -51,6 +51,7 @@ class Player:
         self.voted_for: Optional[str] = None 
         self.memos: Dict[str, str] = {} # target_id: memo_text
         self.is_judgement_yes: Optional[bool] = None # 찬반 투표 결과
+        self.has_skipped = False # 현재 단계에서 스킵 버튼 사용 여부
 
 class MafiaGame:
     def __init__(self, room_id: str):
@@ -229,7 +230,7 @@ class MafiaGame:
             raise
 
     def check_victory(self) -> Optional[Team]:
-        # 머릿수 계산 가중치 적용
+        # 머릿수 계산 가중치 적용 (마피아42 특수 룰)
         mafia_heads = 0
         citizen_heads = 0
         
@@ -238,28 +239,36 @@ class MafiaGame:
         for p in self.players.values():
             if not p.is_alive: continue
             
-            # 가중치 계산
+            # 1. 가중치(머릿수) 계산
             weight = 1
-            if p.role == Role.POLITICIAN: weight = 2
-            elif p.role == Role.GANGSTER: weight = 3
+            if p.role == Role.POLITICIAN: 
+                weight = 2 # 정치인은 상시 2명분
+            elif p.role == Role.GANGSTER: 
+                weight = 3 # 건달은 상시 3명분
             
-            # 팀 판정
+            # 2. 팀 판정
             is_mafia_team = False
             if p.role == Role.MAFIA:
                 is_mafia_team = True
                 real_killers_alive = True
             elif p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted:
+                # 접선된 보조직업만 마피아 팀 머릿수로 계산
                 is_mafia_team = True
-                if p.role == Role.BEAST_MAN: real_killers_alive = True
+                if p.role == Role.BEAST_MAN: 
+                    real_killers_alive = True # 접선된 짐인은 킬러 판정
             
             if is_mafia_team:
                 mafia_heads += weight
             else:
+                # 접선 안 된 보조직업은 시민 팀 머릿수로 포함됨 (요청 사항)
                 citizen_heads += weight
 
+        # 모든 킬러가 죽으면 시민 승리
         if not real_killers_alive:
             return Team.CITIZEN
         
+        # 1:1 상황 드라마틱 예외 처리 (정치인이 있다면 1 vs 2 상황이라 게임이 계속됨)
+        # 마피아 팀 머릿수가 시민 팀보다 같거나 많으면 마피아 승리
         if mafia_heads >= citizen_heads:
             return Team.MAFIA
             
@@ -281,10 +290,13 @@ class MafiaGame:
             p.votes = 0
             p.is_judgement_yes = None
 
+    def reset_skips(self):
+        for p in self.players.values():
+            p.has_skipped = False
+
     def has_night_ability(self, role: Role) -> bool:
         """밤에 능동적으로 능력을 사용하는 직업인지 확인"""
         return role in [
             Role.MAFIA, Role.POLICE, Role.DOCTOR, Role.SPY, 
             Role.BEAST_MAN, Role.GANGSTER, Role.DETECTIVE, Role.REPORTER
         ]
-
