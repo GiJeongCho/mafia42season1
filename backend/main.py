@@ -268,15 +268,26 @@ async def night_action(sid, data):
     try:
         target_id = data.get("target_id")
         player = game.players.get(sid)
+        target = game.players.get(target_id)
+        
         if player and player.is_alive and game.state == GameState.NIGHT:
             player.target_id = target_id
-            if player.role == Role.MAFIA:
-                mafia_ids = [p.player_id for p in game.players.values() if p.role == Role.MAFIA and p.is_alive]
-                for mid in mafia_ids:
+            
+            # 마피아 팀(마피아 + 접선된 보조) 실시간 총구 공유
+            is_mafia_team = (player.role == Role.MAFIA or (player.role in [Role.SPY, Role.BEAST_MAN] and player.is_contacted))
+            if is_mafia_team:
+                mafia_team_ids = [p.player_id for p in game.players.values() if (p.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted)) and p.is_alive]
+                for mid in mafia_team_ids:
                     if mid != sid:
                         await sio.emit("mafia_target_sync", {"attacker_id": sid, "target_id": target_id}, room=mid)
+
             if game.has_night_ability(player.role):
-                await sio.emit("action_confirmed", {"message": "능력을 사용했습니다."}, room=sid)
+                target_name = target.name if target else "알 수 없음"
+                # 개별 알림 및 로그 업데이트를 위한 이벤트 발송
+                await sio.emit("action_confirmed", {
+                    "message": f"[{target_name}]님을 선택하였습니다.",
+                    "target_name": target_name
+                }, room=sid)
     except Exception as e:
         logger.error(f"Error in night_action: {e}")
 
