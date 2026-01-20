@@ -55,6 +55,7 @@ async def disconnect(sid):
                     del rooms[room_id]
                 else:
                     await broadcast_player_list(room_id)
+                    await sio.emit("receive_chat", {"sender": "시스템", "message": "누군가 방을 나갔습니다.", "type": "normal"}, room=room_id)
         del player_to_room[sid]
     logger.info(f"Client disconnected: {sid}")
 
@@ -75,10 +76,11 @@ async def join_room(sid, data):
         game = rooms[room_id]
         game.add_player(sid, player_name)
         player_to_room[sid] = room_id
-        sio.enter_room(sid, room_id)
+        await sio.enter_room(sid, room_id)
         
         await broadcast_player_list(room_id)
         await sio.emit("room_joined", {"room_id": room_id, "host_id": game.host_id}, room=sid)
+        await sio.emit("receive_chat", {"sender": "시스템", "message": f"{player_name}님이 입장했습니다.", "type": "normal"}, room=room_id)
         logger.info(f"Player {player_name} joined room {room_id}")
     else:
         await sio.emit("error", {"message": "존재하지 않는 방입니다."}, room=sid)
@@ -105,6 +107,12 @@ async def start_game(sid, data):
         for pid, p in game.players.items():
             await sio.emit("game_started", {"role": p.role.value}, room=pid)
         
+        # 초기 타이머 설정
+        if game.state == GameState.NIGHT:
+            game.timer = game.settings["night_duration"]
+        else:
+            game.timer = game.settings["day_duration"]
+            
         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
         logger.info(f"Game started in room {room_id}")
     else:
@@ -136,6 +144,7 @@ async def process_night_auto(room_id):
                 await sio.emit("investigation_result", {"message": f"조사 결과: {target.name}님의 직업은 {target.role.value}입니다."}, room=pid)
 
         game.process_night_actions()
+        game.timer = 5 # MORNING 지속 시간
         await sio.emit("morning_results", {"dead": game.dead_last_night, "logs": game.logs[-5:]}, room=room_id)
         await broadcast_player_list(room_id)
         
@@ -155,6 +164,7 @@ async def process_voting_results(room_id):
     if not tally:
         game.state = GameState.NIGHT
         game.day_count += 1
+        game.timer = game.settings["night_duration"]
         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
         return
 
@@ -164,10 +174,12 @@ async def process_voting_results(room_id):
     if len(candidates) == 1 and max_votes > 0:
         game.nominee_id = candidates[0]
         game.state = GameState.LAST_ARGUMENT
+        game.timer = 15
         await sio.emit("nominee_alert", {"name": game.players[game.nominee_id].name}, room=room_id)
     else:
         game.state = GameState.NIGHT
         game.day_count += 1
+        game.timer = game.settings["night_duration"]
         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
     
     game.reset_votes()
@@ -197,6 +209,7 @@ async def process_judgement_results(room_id):
     else:
         game.state = GameState.NIGHT
         game.day_count += 1
+        game.timer = game.settings["night_duration"]
         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
 
 @sio.event
@@ -288,59 +301,32 @@ async def game_loop():
                 if game.state == GameState.WAITING or game.state == GameState.FINISHED:
                     continue
 
-                if game.state == GameState.NIGHT:
-                    if game.timer == 0: game.timer = game.settings["night_duration"]
-                    await sio.emit("timer", {"time": game.timer}, room=room_id)
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                    if game.timer <= 0: await process_night_auto(room_id)
-
-                elif game.state == GameState.MORNING:
-                    if game.timer == 0: game.timer = 5
-                    await sio.emit("timer", {"time": game.timer}, room=room_id)
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                    if game.timer <= 0:
+                if game.timer <= 0:
+                    if game.state == GameState.NIGHT:
+                        await process_night_auto(room_id)
+                    elif game.state == GameState.MORNING:
                         game.state = GameState.DAY
-                        game.timer = 0
+                        game.timer = game.settings["day_duration"]
                         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
-
-                elif game.state == GameState.DAY:
-                    if game.timer == 0: game.timer = game.settings["day_duration"]
-                    await sio.emit("timer", {"time": game.timer}, room=room_id)
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                    if game.timer <= 0:
+                    elif game.state == GameState.DAY:
                         game.state = GameState.VOTING
-                        game.timer = 0
+                        game.timer = 15
                         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
-
-                elif game.state == GameState.VOTING:
-                    if game.timer == 0: game.timer = 15
-                    await sio.emit("timer", {"time": game.timer}, room=room_id)
-                    if game.timer > 5: await sio.emit("vote_tally", game.get_vote_results(), room=room_id)
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                    if game.timer <= 0: await process_voting_results(room_id)
-
-                elif game.state == GameState.LAST_ARGUMENT:
-                    if game.timer == 0: game.timer = 15
-                    await sio.emit("timer", {"time": game.timer}, room=room_id)
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                    if game.timer <= 0:
+                    elif game.state == GameState.VOTING:
+                        await process_voting_results(room_id)
+                    elif game.state == GameState.LAST_ARGUMENT:
                         game.state = GameState.JUDGEMENT
-                        game.timer = 0
+                        game.timer = 5
                         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
-
-                elif game.state == GameState.JUDGEMENT:
-                    if game.timer == 0: game.timer = 5
+                    elif game.state == GameState.JUDGEMENT:
+                        await process_judgement_results(room_id)
+                else:
                     await sio.emit("timer", {"time": game.timer}, room=room_id)
-                    await asyncio.sleep(1)
+                    if game.state == GameState.VOTING and game.timer > 5:
+                        await sio.emit("vote_tally", game.get_vote_results(), room=room_id)
                     game.timer -= 1
-                    if game.timer <= 0: await process_judgement_results(room_id)
 
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(1)
         except Exception as e:
             logger.error(f"Error in game_loop: {e}")
             await asyncio.sleep(1)
