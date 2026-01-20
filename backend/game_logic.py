@@ -53,7 +53,8 @@ class Player:
         self.is_judgement_yes: Optional[bool] = None # 찬반 투표 결과
 
 class MafiaGame:
-    def __init__(self):
+    def __init__(self, room_id: str):
+        self.room_id = room_id
         self.players: Dict[str, Player] = {}
         self.state = GameState.WAITING
         self.day_count = 1
@@ -61,7 +62,30 @@ class MafiaGame:
         self.logs: List[str] = []
         self.reporter_used = False
         self.timer = 0
-        self.nominee_id: Optional[str] = None # 최후의 반론 대상자
+        self.nominee_id: Optional[str] = None 
+        self.host_id: Optional[str] = None
+        self.settings = {
+            "start_state": "NIGHT",
+            "night_duration": 30,
+            "day_duration": 90
+        }
+
+    def add_player(self, player_id: str, name: str):
+        if player_id not in self.players:
+            player = Player(player_id, name)
+            self.players[player_id] = player
+            if not self.host_id:
+                self.host_id = player_id
+            logger.info(f"Player added to room {self.room_id}: {name}")
+
+    def start_game(self):
+        if len(self.players) < 4:
+            return False
+        self.assign_roles()
+        # 설정된 시작 상태에 따라 초기 상태 결정
+        start_state = self.settings.get("start_state", "NIGHT")
+        self.state = GameState.NIGHT if start_state == "NIGHT" else GameState.DAY
+        return True
 
     def assign_roles(self):
         player_ids = list(self.players.keys())
@@ -96,6 +120,7 @@ class MafiaGame:
         
         for i, pid in enumerate(player_ids):
             self.players[pid].role = assigned_roles[i]
+            self.players[pid].is_alive = True # 명시적으로 생존 상태 초기화
             self.players[pid].memos = {other_pid: "" for other_pid in player_ids}
 
     def process_night_actions(self):

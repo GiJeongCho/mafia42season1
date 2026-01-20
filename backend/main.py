@@ -1,12 +1,15 @@
 import socketio
 import uvicorn
+import asyncio
+import random
+import logging
+import os
+from typing import List, Dict, Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from game_logic import MafiaGame, Role, GameState, Team
-import logging
-import os
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -28,8 +31,9 @@ FRONTEND_PATH = os.path.join(os.path.dirname(__file__), "../frontend")
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 socket_app = socketio.ASGIApp(sio, app)
 
-# 게임 인스턴스
-game = MafiaGame()
+# 게임 인스턴스들을 관리하는 딕셔너리
+rooms: Dict[str, MafiaGame] = {}
+player_to_room: Dict[str, str] = {}
 
 @app.get("/")
 async def get_index():
@@ -41,195 +45,165 @@ async def connect(sid, environ):
 
 @sio.event
 async def disconnect(sid):
+    if sid in player_to_room:
+        room_id = player_to_room[sid]
+        if room_id in rooms:
+            game = rooms[room_id]
+            if sid in game.players:
+                del game.players[sid]
+                if not game.players:
+                    del rooms[room_id]
+                else:
+                    await broadcast_player_list(room_id)
+        del player_to_room[sid]
     logger.info(f"Client disconnected: {sid}")
 
 @sio.event
-async def join_game(sid, data):
-    try:
-        player_name = data.get("name", f"Player_{sid[:4]}")
-        game.add_player(sid, player_name)
-        await sio.emit("player_list", [{"id": p.player_id, "name": p.name} for p in game.players.values()])
-        logger.info(f"Player {player_name} joined game.")
-    except Exception as e:
-        logger.error(f"Error in join_game: {e}")
+async def create_room(sid, data):
+    room_id = f"room_{random.randint(1000, 9999)}"
+    rooms[room_id] = MafiaGame(room_id)
+    rooms[room_id].host_id = sid
+    logger.info(f"Room created: {room_id} by {sid}")
+    return {"room_id": room_id}
 
 @sio.event
-async def start_game(sid):
+async def join_room(sid, data):
+    room_id = data.get("room_id")
+    player_name = data.get("name", f"Player_{sid[:4]}")
+    
+    if room_id in rooms:
+        game = rooms[room_id]
+        game.add_player(sid, player_name)
+        player_to_room[sid] = room_id
+        sio.enter_room(sid, room_id)
+        
+        await broadcast_player_list(room_id)
+        await sio.emit("room_joined", {"room_id": room_id, "host_id": game.host_id}, room=sid)
+        logger.info(f"Player {player_name} joined room {room_id}")
+    else:
+        await sio.emit("error", {"message": "존재하지 않는 방입니다."}, room=sid)
+
+async def broadcast_player_list(room_id):
+    if room_id in rooms:
+        game = rooms[room_id]
+        player_data = [{"id": p.player_id, "name": p.name, "is_alive": p.is_alive} for p in game.players.values()]
+        await sio.emit("player_list", player_data, room=room_id)
+
+@sio.event
+async def start_game(sid, data):
+    room_id = player_to_room.get(sid)
+    if not room_id or room_id not in rooms: return
+    
+    game = rooms[room_id]
+    if sid != game.host_id:
+        await sio.emit("error", {"message": "방장만 게임을 시작할 수 있습니다."}, room=sid)
+        return
+
+    game.settings["start_state"] = data.get("start_state", "NIGHT")
+    
+    if game.start_game():
+        for pid, p in game.players.items():
+            await sio.emit("game_started", {"role": p.role.value}, room=pid)
+        
+        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
+        logger.info(f"Game started in room {room_id}")
+    else:
+        await sio.emit("error", {"message": "최소 4명의 플레이어가 필요합니다."}, room=sid)
+
+@sio.event
+async def skip_timer(sid):
+    room_id = player_to_room.get(sid)
+    if room_id in rooms:
+        game = rooms[room_id]
+        if game.timer > 10:
+            game.timer -= 10
+            await sio.emit("timer", {"time": game.timer}, room=room_id)
+            logger.info(f"Timer skipped 10s in room {room_id} by {sid}")
+
+async def process_night_auto(room_id):
+    if room_id not in rooms: return
+    game = rooms[room_id]
     try:
-        if game.start_game():
-            # 시작 시 밤으로 변경 (직업 능력 사용을 위해)
-            game.state = GameState.NIGHT
-            
-            for pid, p in game.players.items():
-                # 각 플레이어에게 자신의 직업 전송
-                await sio.emit("game_started", {"role": p.role.value}, room=pid)
-            
-            await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
-            logger.info("Game started and moved to NIGHT.")
-        else:
-            await sio.emit("error", {"message": "최소 4명의 플레이어가 필요합니다."})
-    except Exception as e:
-        logger.error(f"Error in start_game: {e}")
-
-import asyncio
-
-# ... 기존 임포트 유지 ...
-
-# 게임 타이머 설정을 위한 비동기 루프
-async def game_loop():
-    while True:
-        try:
-            if game.state == GameState.WAITING or game.state == GameState.FINISHED:
-                await asyncio.sleep(1)
-                continue
-
-            # 밤 (25초)
-            if game.state == GameState.NIGHT:
-                game.timer = 25
-                while game.timer > 0:
-                    await sio.emit("timer", {"time": game.timer})
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                await process_night_auto()
-
-            # 아침/결과 발표 (5초)
-            elif game.state == GameState.MORNING:
-                game.timer = 5
-                while game.timer > 0:
-                    await sio.emit("timer", {"time": game.timer})
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                game.state = GameState.DAY
-                await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
-
-            # 낮/토론 (참가자 수 * 15초)
-            elif game.state == GameState.DAY:
-                live_count = len([p for p in game.players.values() if p.is_alive])
-                game.timer = live_count * 15
-                while game.timer > 0 and game.state == GameState.DAY:
-                    await sio.emit("timer", {"time": game.timer})
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                if game.state == GameState.DAY:
-                    game.state = GameState.VOTING
-                    await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
-
-            # 투표 (15초)
-            elif game.state == GameState.VOTING:
-                game.timer = 15
-                while game.timer > 0 and game.state == GameState.VOTING:
-                    await sio.emit("timer", {"time": game.timer})
-                    # 마지막 5초 전까지는 실시간 투표 집계 공유
-                    if game.timer > 5:
-                        await sio.emit("vote_tally", game.get_vote_results())
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                await process_voting_results()
-
-            # 최후의 반론 (15초)
-            elif game.state == GameState.LAST_ARGUMENT:
-                game.timer = 15
-                while game.timer > 0:
-                    await sio.emit("timer", {"time": game.timer})
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                game.state = GameState.JUDGEMENT
-                await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
-
-            # 찬반 투표 (5초)
-            elif game.state == GameState.JUDGEMENT:
-                game.timer = 5
-                while game.timer > 0:
-                    await sio.emit("timer", {"time": game.timer})
-                    await asyncio.sleep(1)
-                    game.timer -= 1
-                await process_judgement_results()
-
-        except Exception as e:
-            logger.error(f"Error in game_loop: {e}")
-            await asyncio.sleep(1)
-
-async def process_night_auto():
-    # 기존 process_night 로직을 자동 실행용으로 분리
-    try:
-        # 경찰/스파이 조사 결과 전송
+        # 조사 결과 전송 로직...
         for pid, player in game.players.items():
             if not player.is_alive or not player.target_id: continue
             target = game.players.get(player.target_id)
             if not target: continue
             if player.role == Role.POLICE:
-                result = "마피아입니다." if target.role == Role.MAFIA else "마피아가 아닙니다."
-                await sio.emit("investigation_result", {"message": f"조사 결과: {target.name}님은 {result}"}, room=pid)
+                res = "마피아입니다." if target.role == Role.MAFIA else "마피아가 아닙니다."
+                await sio.emit("investigation_result", {"message": f"조사 결과: {target.name}님은 {res}"}, room=pid)
             elif player.role == Role.SPY:
                 await sio.emit("investigation_result", {"message": f"조사 결과: {target.name}님의 직업은 {target.role.value}입니다."}, room=pid)
 
         game.process_night_actions()
-        await sio.emit("morning_results", {"dead": game.dead_last_night, "logs": game.logs[-5:]})
-        await sio.emit("player_list", [{"id": p.player_id, "name": p.name, "is_alive": p.is_alive} for p in game.players.values()])
+        await sio.emit("morning_results", {"dead": game.dead_last_night, "logs": game.logs[-5:]}, room=room_id)
+        await broadcast_player_list(room_id)
         
         winner = game.check_victory()
         if winner:
-            await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민"})
+            await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민"}, room=room_id)
             game.state = GameState.FINISHED
         else:
-            await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
+            await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
     except Exception as e:
         logger.error(f"Error in process_night_auto: {e}")
 
-async def process_voting_results():
+async def process_voting_results(room_id):
+    if room_id not in rooms: return
+    game = rooms[room_id]
     tally = game.get_vote_results()
     if not tally:
         game.state = GameState.NIGHT
         game.day_count += 1
-        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
+        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
         return
 
-    # 최다 득표자 선별
     max_votes = max(tally.values())
     candidates = [pid for pid, votes in tally.items() if votes == max_votes]
     
     if len(candidates) == 1 and max_votes > 0:
         game.nominee_id = candidates[0]
         game.state = GameState.LAST_ARGUMENT
-        await sio.emit("nominee_alert", {"name": game.players[game.nominee_id].name})
+        await sio.emit("nominee_alert", {"name": game.players[game.nominee_id].name}, room=room_id)
     else:
-        # 동점이거나 투표가 없으면 바로 밤으로
         game.state = GameState.NIGHT
         game.day_count += 1
-        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
+        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
     
     game.reset_votes()
-    await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
+    await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
 
-async def process_judgement_results():
+async def process_judgement_results(room_id):
+    if room_id not in rooms: return
+    game = rooms[room_id]
     yes_votes = len([p for p in game.players.values() if p.is_judgement_yes is True])
     no_votes = len([p for p in game.players.values() if p.is_judgement_yes is False])
     
-    # 건달에게 협박당한 경우 무조건 반대로 간주 (로직 보강 필요시 여기에 추가)
-    
-    if yes_votes >= no_votes and yes_votes > 0:
+    if yes_votes > no_votes:
         nominee = game.players[game.nominee_id]
-        # 정치인 패시브: 투표로 죽지 않음
         if nominee.role == Role.POLITICIAN:
-            await sio.emit("system_message", {"message": f"{nominee.name}님은 정치인의 권력으로 처형되지 않았습니다!"})
+            await sio.emit("system_message", {"message": f"{nominee.name}님은 정치인의 권력으로 처형되지 않았습니다!"}, room=room_id)
         else:
             nominee.is_alive = False
-            await sio.emit("system_message", {"message": f"{nominee.name}님이 처형되었습니다."})
-            await sio.emit("player_list", [{"id": p.player_id, "name": p.name, "is_alive": p.is_alive} for p in game.players.values()])
+            await sio.emit("system_message", {"message": f"{nominee.name}님이 처형되었습니다."}, room=room_id)
+            await broadcast_player_list(room_id)
     else:
-        await sio.emit("system_message", {"message": "찬성 표가 부족하여 처형되지 않았습니다."})
+        await sio.emit("system_message", {"message": "찬성 표가 부족하여 처형되지 않았습니다."}, room=room_id)
 
     winner = game.check_victory()
     if winner:
-        await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민"})
+        await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민"}, room=room_id)
         game.state = GameState.FINISHED
     else:
         game.state = GameState.NIGHT
         game.day_count += 1
-        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count})
+        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
 
 @sio.event
 async def update_memo(sid, data):
+    room_id = player_to_room.get(sid)
+    if not room_id: return
+    game = rooms[room_id]
     target_id = data.get("target_id")
     memo_text = data.get("memo")
     if sid in game.players and target_id in game.players:
@@ -238,75 +212,59 @@ async def update_memo(sid, data):
 
 @sio.event
 async def vote(sid, data):
+    room_id = player_to_room.get(sid)
+    if not room_id: return
+    game = rooms[room_id]
     if game.state == GameState.VOTING:
-        target_id = data.get("target_id")
-        if sid in game.players and (target_id in game.players or target_id is None):
-            game.players[sid].voted_for = target_id
+        game.players[sid].voted_for = data.get("target_id")
 
 @sio.event
 async def judgement_vote(sid, data):
+    room_id = player_to_room.get(sid)
+    if not room_id: return
+    game = rooms[room_id]
     if game.state == GameState.JUDGEMENT:
-        is_yes = data.get("is_yes")
-        if sid in game.players:
-            game.players[sid].is_judgement_yes = is_yes
+        game.players[sid].is_judgement_yes = data.get("is_yes")
 
 @sio.event
 async def night_action(sid, data):
+    room_id = player_to_room.get(sid)
+    if not room_id: return
+    game = rooms[room_id]
     try:
         target_id = data.get("target_id")
         player = game.players.get(sid)
-        
         if player and player.is_alive and game.state == GameState.NIGHT:
-            # 타겟 업데이트 (실시간 총구 공유용)
             player.target_id = target_id
-            
-            # 마피아 팀이면 같은 팀원들에게 타겟 정보 공유
             if player.role == Role.MAFIA:
                 mafia_ids = [p.player_id for p in game.players.values() if p.role == Role.MAFIA and p.is_alive]
-                contacted_ids = [p.player_id for p in game.players.values() if p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted and p.is_alive]
-                for mid in (mafia_ids + contacted_ids):
+                for mid in mafia_ids:
                     if mid != sid:
                         await sio.emit("mafia_target_sync", {"attacker_id": sid, "target_id": target_id}, room=mid)
-
             if game.has_night_ability(player.role):
-                logger.info(f"Night action: {player.name} ({player.role.value}) targets {target_id}")
                 await sio.emit("action_confirmed", {"message": "능력을 사용했습니다."}, room=sid)
-                
-                # 스파이가 군인을 조사한 경우 군인에게 알림
-                if player.role == Role.SPY:
-                    target = game.players.get(target_id)
-                    if target and target.role == Role.SOLDIER:
-                        await sio.emit("system_message", {"message": " 누군가 당신의 신분을 조사했습니다!"}, room=target_id)
-            else:
-                await sio.emit("error", {"message": "밤에 능력을 사용할 수 없는 직업입니다."}, room=sid)
     except Exception as e:
         logger.error(f"Error in night_action: {e}")
 
 @sio.event
 async def send_chat(sid, data):
+    room_id = player_to_room.get(sid)
+    if not room_id: return
+    game = rooms[room_id]
     try:
-        message = data.get("message")
         player = game.players.get(sid)
-        if not player or not message:
-            return
-
-        # 최후의 반론 시간에는 해당 플레이어만 채팅 가능
-        if game.state == GameState.LAST_ARGUMENT:
-            if sid != game.nominee_id:
-                return
-
+        if not player: return
+        message = data.get("message")
+        if game.state == GameState.LAST_ARGUMENT and sid != game.nominee_id: return
+        
         chat_data = {"sender": player.name, "message": message, "type": "normal"}
-
-        # 사망자 채팅
         if not player.is_alive:
             chat_data["type"] = "dead"
-            # 사망자와 영매에게만 전송
             for pid, p in game.players.items():
                 if not p.is_alive or p.role == Role.MEDIUM:
                     await sio.emit("receive_chat", chat_data, room=pid)
             return
-
-        # 밤 채팅 (마피아팀 / 연인)
+        
         if game.state == GameState.NIGHT:
             if player.role == Role.MAFIA or (player.role in [Role.SPY, Role.BEAST_MAN] and player.is_contacted):
                 chat_data["type"] = "mafia"
@@ -319,12 +277,73 @@ async def send_chat(sid, data):
                     if p.role == Role.LOVERS:
                         await sio.emit("receive_chat", chat_data, room=pid)
             return
-
-        # 낮 채팅 (모두에게)
-        await sio.emit("receive_chat", chat_data)
-        
+        await sio.emit("receive_chat", chat_data, room=room_id)
     except Exception as e:
         logger.error(f"Error in send_chat: {e}")
+
+async def game_loop():
+    while True:
+        try:
+            for room_id, game in list(rooms.items()):
+                if game.state == GameState.WAITING or game.state == GameState.FINISHED:
+                    continue
+
+                if game.state == GameState.NIGHT:
+                    if game.timer == 0: game.timer = game.settings["night_duration"]
+                    await sio.emit("timer", {"time": game.timer}, room=room_id)
+                    await asyncio.sleep(1)
+                    game.timer -= 1
+                    if game.timer <= 0: await process_night_auto(room_id)
+
+                elif game.state == GameState.MORNING:
+                    if game.timer == 0: game.timer = 5
+                    await sio.emit("timer", {"time": game.timer}, room=room_id)
+                    await asyncio.sleep(1)
+                    game.timer -= 1
+                    if game.timer <= 0:
+                        game.state = GameState.DAY
+                        game.timer = 0
+                        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
+
+                elif game.state == GameState.DAY:
+                    if game.timer == 0: game.timer = game.settings["day_duration"]
+                    await sio.emit("timer", {"time": game.timer}, room=room_id)
+                    await asyncio.sleep(1)
+                    game.timer -= 1
+                    if game.timer <= 0:
+                        game.state = GameState.VOTING
+                        game.timer = 0
+                        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
+
+                elif game.state == GameState.VOTING:
+                    if game.timer == 0: game.timer = 15
+                    await sio.emit("timer", {"time": game.timer}, room=room_id)
+                    if game.timer > 5: await sio.emit("vote_tally", game.get_vote_results(), room=room_id)
+                    await asyncio.sleep(1)
+                    game.timer -= 1
+                    if game.timer <= 0: await process_voting_results(room_id)
+
+                elif game.state == GameState.LAST_ARGUMENT:
+                    if game.timer == 0: game.timer = 15
+                    await sio.emit("timer", {"time": game.timer}, room=room_id)
+                    await asyncio.sleep(1)
+                    game.timer -= 1
+                    if game.timer <= 0:
+                        game.state = GameState.JUDGEMENT
+                        game.timer = 0
+                        await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
+
+                elif game.state == GameState.JUDGEMENT:
+                    if game.timer == 0: game.timer = 5
+                    await sio.emit("timer", {"time": game.timer}, room=room_id)
+                    await asyncio.sleep(1)
+                    game.timer -= 1
+                    if game.timer <= 0: await process_judgement_results(room_id)
+
+            await asyncio.sleep(0.1)
+        except Exception as e:
+            logger.error(f"Error in game_loop: {e}")
+            await asyncio.sleep(1)
 
 @app.on_event("startup")
 async def startup_event():
@@ -332,4 +351,3 @@ async def startup_event():
 
 if __name__ == "__main__":
     uvicorn.run(socket_app, host="0.0.0.0", port=8001)
-
