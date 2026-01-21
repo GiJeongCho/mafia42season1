@@ -270,64 +270,70 @@ class MafiaGame:
             raise
 
     def check_victory(self) -> Optional[Team]:
-        # 머릿수 계산 가중치 적용 (마피아42 특수 룰)
-        mafia_heads = 0
-        citizen_heads = 0
+        """투표권(Voting Power) 기반 승리 조건 계산"""
+        mafia_vote_power = 0
+        citizen_vote_power = 0
         
         real_killers_alive = False # 게임을 계속 진행할 수 있는 킬러(마피아/접선된 짐인)가 있는지
         
         for p in self.players.values():
             if not p.is_alive: continue
             
-            # 1. 가중치(머릿수) 계산
-            weight = 1
-            if p.role == Role.POLITICIAN: 
-                weight = 2 # 정치인은 상시 2명분
-            elif p.role == Role.GANGSTER: 
-                weight = 3 # 건달은 상시 3명분
+            # 1. 투표권(Voting Power) 계산
+            vote_power = 0
+            if p.is_threatened:
+                vote_power = 0 # 협박당하면 투표권 박탈
+            elif p.role == Role.POLITICIAN:
+                vote_power = 2 # 정치인은 상시 2표
+            else:
+                vote_power = 1 # 나머지는 기본 1표 (건달 포함)
             
-            # 2. 팀 판정
+            # 2. 팀 판정 (스파이, 짐인은 접선 여부와 상관없이 마피아 팀의 투표력으로 합산)
             is_mafia_team = False
-            if p.role == Role.MAFIA:
+            if p.role in [Role.MAFIA, Role.SPY, Role.BEAST_MAN]:
                 is_mafia_team = True
-                real_killers_alive = True
-            elif p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted:
-                # 접선된 보조직업만 마피아 팀 머릿수로 계산
-                is_mafia_team = True
-                if p.role == Role.BEAST_MAN: 
-                    real_killers_alive = True # 접선된 짐인은 킬러 판정
+                # 실질적인 살해 가능 인원 판정
+                if p.role == Role.MAFIA or (p.role == Role.BEAST_MAN and p.is_contacted):
+                    real_killers_alive = True
             
             if is_mafia_team:
-                mafia_heads += weight
+                mafia_vote_power += vote_power
             else:
-                # 접선 안 된 보조직업은 시민 팀 머릿수로 포함됨
-                citizen_heads += weight
+                citizen_vote_power += vote_power
 
         # 모든 킬러가 죽으면 시민 승리
         if not real_killers_alive:
             return Team.CITIZEN
         
-        # 1:1 상황 드라마틱 예외 처리 (정치인이 있다면 1 vs 2 상황이라 게임이 계속됨)
-        if mafia_heads >= citizen_heads:
+        # 마피아 팀의 투표권이 시민 팀과 같거나 많아지면 (투표로 통제 가능) 마피아 승리
+        if mafia_vote_power >= citizen_vote_power:
             return Team.MAFIA
             
         return None
 
     def get_vote_results(self) -> Dict[str, int]:
+        """투표권 가중치를 반영한 투표 결과 계산"""
         results = {pid: 0 for pid, p in self.players.items() if p.is_alive}
         for pid, player in self.players.items():
             if player.is_alive and player.voted_for:
-                # 정치인은 2표
-                weight = 2 if player.role == Role.POLITICIAN else 1
+                # 투표권 가중치 적용
+                weight = 1
+                if player.is_threatened:
+                    weight = 0
+                elif player.role == Role.POLITICIAN:
+                    weight = 2
+                
                 if player.voted_for in results:
                     results[player.voted_for] += weight
         return results
 
     def reset_votes(self):
+        """투표 초기화 및 협박 상태 해제"""
         for p in self.players.values():
             p.voted_for = None
             p.votes = 0
             p.is_judgement_yes = None
+            p.is_threatened = False # 투표 종료 후 협박 해제
 
     def reset_skips(self):
         for p in self.players.values():

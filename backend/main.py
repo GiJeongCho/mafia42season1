@@ -302,13 +302,19 @@ async def night_action(sid, data):
         if player and player.is_alive and game.state == GameState.NIGHT:
             player.target_id = target_id
             
-            # 마피아 팀 실시간 공유
+            # 1. 마피아 팀 실시간 공유
             is_mafia_team = (player.role == Role.MAFIA or (player.role in [Role.SPY, Role.BEAST_MAN] and player.is_contacted))
             if is_mafia_team:
                 mafia_team_ids = [p.player_id for p in game.players.values() if (p.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted)) and p.is_alive]
                 for mid in mafia_team_ids:
                     if mid != sid:
                         await sio.emit("mafia_target_sync", {"attacker_id": sid, "target_id": target_id}, room=mid)
+            
+            # 2. 사립탐정 실시간 추적 (타겟의 행적이 바뀌면 즉시 알림)
+            for pid, p in game.players.items():
+                if p.role == Role.DETECTIVE and p.is_alive and p.target_id == sid:
+                    msg = f"당신이 지켜보는 {player.name}님이 [{target.name if target else '아무도 아님'}]님에게 손을 대고 있습니다."
+                    await sio.emit("receive_chat", {"sender": "추리(실시간)", "message": msg, "type": "normal"}, room=pid)
 
             if game.has_night_ability(player.role):
                 target_name = target.name if target else "알 수 없음"
