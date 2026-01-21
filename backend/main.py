@@ -275,7 +275,11 @@ async def vote(sid, data):
     if not room_id: return
     game = rooms[room_id]
     if game.state == GameState.VOTING:
-        game.players[sid].voted_for = data.get("target_id")
+        player = game.players.get(sid)
+        if player and player.is_alive and not player.is_threatened:
+            player.voted_for = data.get("target_id")
+            await sio.emit("vote_tally", game.get_vote_results(), room=room_id)
+            logger.info(f"Player {player.name} voted for {player.voted_for} in room {room_id}")
 
 @sio.event
 async def judgement_vote(sid, data):

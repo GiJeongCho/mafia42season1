@@ -99,7 +99,7 @@ class MafiaGame:
         
         assigned_roles = []
         
-        # 1. 마피아 팀 배정
+        # 1. 마피아 팀 배정 (최소 1명)
         mafia_team_size = max(1, num_players // 4)
         assigned_roles.extend([Role.MAFIA] * mafia_team_size)
         
@@ -107,15 +107,19 @@ class MafiaGame:
         if num_players >= 5:
             assigned_roles.append(random.choice([Role.SPY, Role.BEAST_MAN]))
             
-        # 2. 시민 팀 - 연인 (인원수가 남고 확률적으로 2명 배정)
+        # 2. 필수 시민 (경찰, 의사 무조건 1명씩)
+        assigned_roles.append(Role.POLICE)
+        assigned_roles.append(Role.DOCTOR)
+            
+        # 3. 시민 팀 - 연인 (인원수가 남고 확률적으로 2명 배정)
         remaining_count = num_players - len(assigned_roles)
         if remaining_count >= 2 and random.random() < 0.3:
             assigned_roles.extend([Role.LOVERS, Role.LOVERS])
             remaining_count -= 2
             
-        # 3. 필수 시민 및 나머지
-        special_pool = [Role.POLICE, Role.DOCTOR, Role.SOLDIER, Role.POLITICIAN, 
-                        Role.GANGSTER, Role.MEDIUM, Role.REPORTER, Role.DETECTIVE]
+        # 4. 나머지 특수 시민 및 일반 시민
+        special_pool = [Role.SOLDIER, Role.POLITICIAN, Role.GANGSTER, 
+                        Role.MEDIUM, Role.REPORTER, Role.DETECTIVE]
         random.shuffle(special_pool)
         
         for _ in range(remaining_count):
@@ -124,13 +128,21 @@ class MafiaGame:
             else:
                 assigned_roles.append(Role.CITIZEN)
 
-        # 인원수에 맞게 최종 셔플
+        # 인원수에 맞게 최종 셔플 및 자르기 (혹시 모를 에러 방지)
         random.shuffle(assigned_roles)
         assigned_roles = assigned_roles[:num_players]
+        
+        # 만약 셔플 중 경찰/의사가 누락되었다면 강제 할당 (매우 적은 인원일 때)
+        if Role.POLICE not in assigned_roles: assigned_roles[0] = Role.POLICE
+        if Role.DOCTOR not in assigned_roles: assigned_roles[1] = Role.DOCTOR
+        
+        random.shuffle(assigned_roles)
         
         for i, pid in enumerate(player_ids):
             self.players[pid].role = assigned_roles[i]
             self.players[pid].is_alive = True
+            self.players[pid].revealed_role = None
+            self.players[pid].status_msg = ""
             self.players[pid].is_contacted = False
             self.players[pid].is_threatened = False
             self.players[pid].is_protected = False
