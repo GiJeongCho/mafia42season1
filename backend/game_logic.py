@@ -37,9 +37,10 @@ class GameState(Enum):
     FINISHED = auto()
 
 class Player:
-    def __init__(self, player_id: str, name: str):
+    def __init__(self, player_id: str, name: str, number: int):
         self.player_id = player_id
         self.name = name
+        self.number = number # 입장 순서 (1, 2, 3...)
         self.role: Optional[Role] = None
         self.revealed_role: Optional[Role] = None # 공개된 직업
         self.status_msg: str = "" # 플레이어 상태 메시지 (예: 희생됨)
@@ -75,7 +76,8 @@ class MafiaGame:
 
     def add_player(self, player_id: str, name: str):
         if player_id not in self.players:
-            player = Player(player_id, name)
+            number = len(self.players) + 1
+            player = Player(player_id, name, number)
             self.players[player_id] = player
             if not self.host_id:
                 self.host_id = player_id

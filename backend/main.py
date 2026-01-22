@@ -110,14 +110,35 @@ async def join_room(sid, data):
 async def broadcast_player_list(room_id):
     if room_id in rooms:
         game = rooms[room_id]
-        player_data = [{
-            "id": p.player_id, 
-            "name": p.name, 
-            "is_alive": p.is_alive,
-            "revealed_role": p.revealed_role.value if p.revealed_role else None,
-            "status_msg": p.status_msg
-        } for p in game.players.values()]
-        await sio.emit("player_list", player_data, room=room_id)
+        sorted_players = list(game.players.values())
+        
+        for sid in game.players.keys():
+            player_data = []
+            requester = game.players.get(sid)
+            # 요청자가 마피아 팀인지 확인 (마피아거나 접선된 보조직업)
+            is_mafia_requester = requester and (requester.role == Role.MAFIA or (requester.role in [Role.SPY, Role.BEAST_MAN] and requester.is_contacted))
+
+            for i, p in enumerate(sorted_players):
+                # 기본적으로 공개된 직업만 보여줌
+                p_role_to_show = p.revealed_role.value if p.revealed_role else None
+                is_teammate = False
+                
+                # 요청자가 마피아 팀이면 같은 팀원들의 정보를 볼 수 있음
+                if is_mafia_requester:
+                    if p.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted):
+                        p_role_to_show = p.role.value
+                        is_teammate = True
+
+                player_data.append({
+                    "index": i + 1,
+                    "id": p.player_id, 
+                    "name": p.name, 
+                    "is_alive": p.is_alive,
+                    "revealed_role": p_role_to_show,
+                    "status_msg": p.status_msg,
+                    "is_teammate": is_teammate
+                })
+            await sio.emit("player_list", player_data, room=sid)
 
 @sio.event
 async def start_game(sid, data):
@@ -395,4 +416,4 @@ async def startup_event():
     asyncio.create_task(game_loop())
 
 if __name__ == "__main__":
-    uvicorn.run(socket_app, host="0.0.0.0", port=8001)
+    uvicorn.run(socket_app, host="0.0.0.0", port=8090)
