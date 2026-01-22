@@ -23,6 +23,7 @@
         .chat-dead { color: #9e9e9e; font-style: italic; }
         .chat-lovers { color: #f48fb1; font-weight: bold; }
         .player-dead { opacity: 0.4; filter: grayscale(1); }
+        .mafia-teammate { border: 2px solid #ff1744 !important; box-shadow: 0 0 10px #ff1744; }
         .mafia-target { border: 3px solid #ff1744 !important; box-shadow: 0 0 20px #ff1744; animation: blink 0.8s infinite; }
         .selected-target { border: 2px solid #00e5ff !important; box-shadow: 0 0 10px #00e5ff; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -53,7 +54,7 @@
                             <h4 class="font-bold text-lg text-white">1. 마피아 (Mafia)</h4>
                             <p class="text-red-400 font-bold mb-1">능력: [밤] 매일 밤 한 명을 선택하여 제거할 수 있습니다.</p>
                             <ul class="list-disc pl-5 space-y-1 text-gray-400">
-                                <li>밤에는 동료 마피아와 상의하여 누구를 죽일지 결정하세요.</li>
+                                <li>밤에는 동료 마피아와 상의하여 누구를 죽일지 결정하세요. 마피아는 서로의 타겟을 실시간으로 확인할 수 있으며, **가장 마지막에 선택된 대상**이 최종 공격 대상이 됩니다.</li>
                                 <li>낮에는 시민인 척 연기해야 합니다. 주로 **'경찰'**이나 **'의사'**를 사칭하여 속이는 것이 기본 전략입니다.</li>
                                 <li>너무 조용하면 의심받습니다. 적당히 수사에 협조하는 척하십시오.</li>
                             </ul>
@@ -293,6 +294,8 @@
     <script>
         const socket = io();
         let myId, myNickname = "", currentRoomId = null, isHost = false, players = [], myRole = null, isAlive = true, gameState = 'WAITING', memos = {}, mafiaTargetSync = {}, mySelectedTargetId = null;
+        let mafiaIds = []; // 마피아 팀원 ID 목록
+
         const rolesWithAbility = ['마피아', '경찰', '의사', '스파이', '짐승인간', '건달', '사립탐정', '기자'];
 
         const roleIcons = {
@@ -337,6 +340,10 @@
             addLog("시스템", `게임이 시작되었습니다. 당신은 [${myRole}]입니다.`);
             updatePlayerActionList();
         });
+        socket.on('mafia_list', (data) => {
+            mafiaIds = data.mafia_ids;
+            updatePlayerActionList();
+        });
         socket.on('timer', (data) => {
             const d = document.getElementById('timer-display');
             if (d) { d.innerText = data.time < 10 ? `0${data.time}` : data.time; if (data.time <= 5) d.classList.add('animate-pulse'); else d.classList.remove('animate-pulse'); }
@@ -377,14 +384,16 @@
             const c = document.getElementById('action-players'); if (!c) return;
             c.innerHTML = players.map(p => {
                 const isT = Object.values(mafiaTargetSync).includes(p.id);
+                const isTeammate = p.is_teammate;
                 const roleIcon = p.revealed_role ? `<span class="text-lg mr-1" title="${p.revealed_role}">${roleIcons[p.revealed_role] || '❓'}</span>` : '';
+                const displayName = p.revealed_role ? `${p.index}번: ${p.name} (${p.revealed_role})` : `${p.index}번: ${p.name}`;
                 const statusDisplay = p.status_msg ? `<div class="text-[8px] text-red-400 font-bold leading-tight mb-1 animate-pulse">⚠️ ${p.status_msg}</div>` : '';
                 
                 return `
-                <div class="flex flex-col gap-1 p-1 bg-gray-800/50 rounded-lg border border-gray-700 player-item">
+                <div class="flex flex-col gap-1 p-1 bg-gray-800/50 rounded-lg border ${isTeammate ? 'mafia-teammate' : 'border-gray-700'} player-item">
                     <button onclick="handlePlayerClick('${p.id}')" class="btn text-left p-2 text-xs truncate flex items-center ${!p.is_alive ? 'player-dead' : ''} ${mySelectedTargetId === p.id ? 'selected-target' : ''} ${isT ? 'mafia-target' : ''}" ${!p.is_alive || !isAlive ? 'disabled' : ''}>
                         ${roleIcon}
-                        <span class="block font-bold truncate">${p.name}</span>
+                        <span class="block font-bold truncate">${displayName}</span>
                     </button>
                     <div class="px-1">
                         ${statusDisplay}
