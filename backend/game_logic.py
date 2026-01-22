@@ -68,6 +68,7 @@ class MafiaGame:
         self.timer = 0
         self.nominee_id: Optional[str] = None 
         self.host_id: Optional[str] = None
+        self.mafia_target_id: Optional[str] = None # 공동 마피아 타겟
         self.settings = {
             "start_state": "NIGHT",
             "night_duration": 30,
@@ -155,31 +156,29 @@ class MafiaGame:
             self.players[pid].memos = {other_pid: "" for other_pid in player_ids}
             self.players[pid].has_skipped = False
 
-    def kill_player(self, player: Player, status_msg: str = ""):
-        """플레이어 사망 처리 및 직업 공개"""
+    def kill_player(self, player: Player, status_msg: str = "", reveal: bool = False):
+        """플레이어 사망 처리 및 직업 공개 여부 결정"""
         if not player.is_alive: return
         player.is_alive = False
-        player.revealed_role = player.role
+        if reveal:
+            player.revealed_role = player.role
         player.status_msg = status_msg
         self.dead_last_night.append(player.name)
 
     def process_night_actions(self):
         """밤 사이클 로직 처리"""
         try:
-            mafia_target = None
+            # 1. 행동 타겟 수집
             doctor_target = None
             beastman_target = None
             
             # 살아있는 마피아 목록
             live_mafias = [p for p in self.players.values() if p.is_alive and p.role == Role.MAFIA]
             
-            # 1. 행동 타겟 수집
             for player in self.players.values():
                 if not player.is_alive or not player.target_id: continue
                 
-                if player.role == Role.MAFIA:
-                    mafia_target = player.target_id
-                elif player.role == Role.DOCTOR:
+                if player.role == Role.DOCTOR:
                     doctor_target = player.target_id
                 elif player.role == Role.BEAST_MAN:
                     beastman_target = player.target_id
@@ -187,6 +186,8 @@ class MafiaGame:
                     target = self.players.get(player.target_id)
                     if target: target.is_threatened = True
 
+            self.dead_last_night = []
+            
             # 2. 기자 특종 처리 (살해 판정 전 취재)
             reporter_p = next((p for p in self.players.values() if p.role == Role.REPORTER and p.is_alive), None)
             if reporter_p and reporter_p.target_id and self.day_count > 1 and not self.reporter_used:
@@ -195,27 +196,27 @@ class MafiaGame:
                     target_p.revealed_role = target_p.role # 직업 공개
                     self.logs.append(f"[특종] {target_p.name}님의 직업은 [{target_p.role.value}]입니다!")
                     self.reporter_used = True
+
+            # 3. 짐승인간 접선 및 공격 특수 로직
             bm_player = next((p for p in self.players.values() if p.role == Role.BEAST_MAN and p.is_alive), None)
             if bm_player and not bm_player.is_contacted:
-                # 마피아가 짐승인간을 쏜 경우 접선
-                if mafia_target == bm_player.player_id:
+                if self.mafia_target_id == bm_player.player_id:
                     bm_player.is_contacted = True
                     self.logs.append("짐승인간이 마피아의 총격에서 살아남아 접선했습니다.")
-                    mafia_target = None # 죽지 않음
-                # 마피아와 짐승인간이 같은 대상을 쏜 경우 접선 및 습격 (의사 힐 무시)
-                elif mafia_target and mafia_target == beastman_target:
+                    self.mafia_target_id = None
+                elif self.mafia_target_id and self.mafia_target_id == beastman_target:
                     bm_player.is_contacted = True
-                    target_player = self.players.get(mafia_target)
+                    target_player = self.players.get(self.mafia_target_id)
                     if target_player:
-                        self.kill_player(target_player, "짐승인간의 습격")
+                        self.kill_player(target_player, "짐승인간의 습격", reveal=False)
                         self.logs.append(f"짐승인간이 {target_player.name}님을 습격하여 접선에 성공했습니다!")
-                    mafia_target = None # 이미 죽였으므로 마피아 타겟 무효화
+                    self.mafia_target_id = None
 
-            # 3. 일반 마피아 공격 판정
-            if mafia_target:
-                target_player = self.players.get(mafia_target)
+            # 4. 일반 마피아 공격 판정
+            if self.mafia_target_id:
+                target_player = self.players.get(self.mafia_target_id)
                 if target_player:
-                    if mafia_target == doctor_target:
+                    if self.mafia_target_id == doctor_target:
                         self.logs.append(f"의사가 누군가를 살려냈습니다.")
                     elif target_player.role == Role.SOLDIER and not target_player.is_bulletproof_used:
                         target_player.is_bulletproof_used = True
@@ -223,33 +224,31 @@ class MafiaGame:
                     elif target_player.role == Role.BEAST_MAN:
                         self.logs.append(f"누군가 습격을 받았으나 멀쩡합니다.")
                     elif target_player.role == Role.LOVERS:
-                        # 연인 희생 로직: 다른 살아있는 연인이 대신 맞음
                         other_lover = next((p for p in self.players.values() if p.role == Role.LOVERS and p.player_id != target_player.player_id and p.is_alive), None)
                         if other_lover:
-                            self.kill_player(other_lover, f"연인 {target_player.name}님을 대신해 희생")
+                            self.kill_player(other_lover, f"연인 {target_player.name}님을 대신해 희생", reveal=False)
                             self.logs.append(f"연인인 {other_lover.name}님이 {target_player.name}님을 대신해 희생하셨습니다.")
                         else:
-                            # 혼자 남은 연인이면 그냥 죽음
-                            self.kill_player(target_player)
-                            self.logs.append(f"{target_player.name}님이 사망하셨습니다. 그의 직업은 [{target_player.role.value}]였습니다.")
+                            self.kill_player(target_player, reveal=False)
+                            self.logs.append(f"{target_player.name}님이 사망하셨습니다.")
                     else:
-                        self.kill_player(target_player)
-                        self.logs.append(f"{target_player.name}님이 사망하셨습니다. 그의 직업은 [{target_player.role.value}]였습니다.")
+                        self.kill_player(target_player, reveal=False)
+                        self.logs.append(f"{target_player.name}님이 사망하셨습니다.")
             
-            # 4. 마피아 전멸 시 접선된 짐승인간의 공격
+            # 5. 마피아 전멸 시 접선된 짐승인간의 공격
             if not live_mafias and bm_player and bm_player.is_contacted and beastman_target:
                 target_player = self.players.get(beastman_target)
                 if target_player and target_player.is_alive:
                     if beastman_target == doctor_target:
                         self.logs.append(f"의사가 누군가를 살려냈습니다.")
                     else:
-                        self.kill_player(target_player)
-                        self.logs.append(f"{target_player.name}님이 사망하셨습니다. 그의 직업은 [{target_player.role.value}]였습니다.")
+                        self.kill_player(target_player, reveal=False)
+                        self.logs.append(f"{target_player.name}님이 사망하셨습니다.")
 
             if not self.dead_last_night:
                 self.logs.append("조용하게 밤이 지나갔습니다.")
 
-            # 5. 조사 처리 (스파이 접선 등)
+            # 6. 조사 처리 (스파이 접선 등)
             for player in self.players.values():
                 if not player.is_alive or not player.target_id: continue
                 target = self.players.get(player.target_id)
@@ -264,6 +263,7 @@ class MafiaGame:
             for player in self.players.values():
                 player.target_id = None
                 player.is_protected = False
+            self.mafia_target_id = None
 
             self.state = GameState.MORNING
             

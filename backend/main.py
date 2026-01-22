@@ -261,9 +261,9 @@ async def process_judgement_results(room_id):
     if yes_votes > no_votes:
         nominee = game.players[game.nominee_id]
         if nominee.role == Role.POLITICIAN:
-            await sio.emit("system_message", {"message": f"{nominee.name}님은 정치인의 권력으로 처형되지 않았습니다!"}, room=room_id)
+            await sio.emit("system_message", {"message": f"{nominee.name}님은 정치인이므로 투표로 죽일 수 없습니다!"}, room=room_id)
         else:
-            game.kill_player(nominee, "투표 처형")
+            game.kill_player(nominee, "투표 처형", reveal=True)
             await sio.emit("system_message", {"message": f"{nominee.name}님이 처형되었습니다. 직업은 [{nominee.role.value}]였습니다."}, room=room_id)
             await broadcast_player_list(room_id)
     else:
@@ -323,9 +323,12 @@ async def night_action(sid, data):
         if player and player.is_alive and game.state == GameState.NIGHT:
             player.target_id = target_id
             
-            # 1. 마피아 팀 실시간 공유
+            # 1. 마피아 팀 실시간 공유 및 공동 타겟 업데이트
             is_mafia_team = (player.role == Role.MAFIA or (player.role in [Role.SPY, Role.BEAST_MAN] and player.is_contacted))
             if is_mafia_team:
+                if player.role == Role.MAFIA:
+                    game.mafia_target_id = target_id # 마지막에 클릭한 마피아의 타겟이 최종 타겟
+                
                 mafia_team_ids = [p.player_id for p in game.players.values() if (p.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted)) and p.is_alive]
                 for mid in mafia_team_ids:
                     if mid != sid:
