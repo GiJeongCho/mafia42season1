@@ -341,6 +341,30 @@ class MafiaGame:
         for p in self.players.values():
             p.has_skipped = False
 
+    def reset_game_state(self):
+        """방은 유지하되 게임 상태만 대기실 상태로 초기화"""
+        self.state = GameState.WAITING
+        self.day_count = 1
+        self.dead_last_night = []
+        self.logs = []
+        self.reporter_used = False
+        self.timer = 0
+        self.nominee_id = None
+        self.mafia_target_id = None
+        for p in self.players.values():
+            p.role = None
+            p.revealed_role = None
+            p.status_msg = ""
+            p.is_alive = True
+            p.is_contacted = False
+            p.is_threatened = False
+            p.is_protected = False
+            p.is_bulletproof_used = False
+            p.votes = 0
+            p.target_id = None
+            p.voted_for = None
+            p.has_skipped = False
+
     def has_night_ability(self, role: Role) -> bool:
         """밤에 능동적으로 능력을 사용하는 직업인지 확인"""
         return role in [

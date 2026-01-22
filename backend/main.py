@@ -311,6 +311,18 @@ async def judgement_vote(sid, data):
         game.players[sid].is_judgement_yes = data.get("is_yes")
 
 @sio.event
+async def back_to_lobby(sid):
+    room_id = player_to_room.get(sid)
+    if not room_id: return
+    game = rooms[room_id]
+    if sid != game.host_id: return
+    
+    game.reset_game_state()
+    await sio.emit("returned_to_lobby", room=room_id)
+    await broadcast_player_list(room_id)
+    await sio.emit("receive_chat", {"sender": "시스템", "message": "방장이 게임을 초기화했습니다. 대기실로 이동합니다.", "type": "normal"}, room=room_id)
+
+@sio.event
 async def night_action(sid, data):
     room_id = player_to_room.get(sid)
     if not room_id: return
