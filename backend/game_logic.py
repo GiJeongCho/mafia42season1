@@ -280,25 +280,36 @@ class MafiaGame:
         for p in self.players.values():
             if not p.is_alive: continue
             
-            # 마피아 팀 전멸 여부 확인
+            # 1. 실질적 킬러(마피아 또는 접선된 짐인) 생존 여부 확인
             if p.role == Role.MAFIA or (p.role == Role.BEAST_MAN and p.is_contacted):
                 real_killers_alive = True
             
-            # 투표권 계산
+            # 2. 투표권(Voting Power) 계산
             p_power = 0
-            if p.is_threatened: p_power = 0
-            elif p.role == Role.POLITICIAN: p_power = 2 
-            else: p_power = 1
+            if p.is_threatened: 
+                p_power = 0 # 협박당하면 투표권 박탈
+            elif p.role == Role.POLITICIAN: 
+                p_power = 2 # 정치인은 상시 2표
+            else: 
+                p_power = 1
             
-            # 팀 분류
-            if p.role in [Role.MAFIA, Role.SPY, Role.BEAST_MAN]:
+            # 3. 팀 파워 분류 (마피아42 규칙: 접선 안 된 보조는 시민 팀 파워로 계산)
+            is_mafia_side_power = False
+            if p.role == Role.MAFIA:
+                is_mafia_side_power = True
+            elif p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted:
+                is_mafia_side_power = True
+            
+            if is_mafia_side_power:
                 mafia_power += p_power
             else:
                 citizen_power += p_power
 
+        # [시민 팀 승리] 모든 실질적 킬러(마피아 & 접선된 짐인)를 다 잡아야 함
         if not real_killers_alive:
-            return Team.CITIZEN 
+            return Team.CITIZEN
         
+        # [마피아 팀 승리] 마피아 팀의 투표권이 시민 팀과 같거나 많아질 때
         if mafia_power >= citizen_power:
             return Team.MAFIA
             

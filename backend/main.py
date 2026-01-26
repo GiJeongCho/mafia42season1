@@ -172,18 +172,14 @@ async def process_night_auto(room_id):
                 hand_name = game.players[hand].name if hand and hand in game.players else "아무런 행동도 하지 않음"
                 await sio.emit("receive_chat", {"sender": "추리", "message": f"지난 밤 [{target.name}]님은 [{hand_name}]님에게 손을 댔습니다.", "type": "system"}, room=pid)
             elif p.role == Role.MEDIUM and not target.is_alive:
-                # 영매는 밤에 죽은 자를 클릭하면 직업을 알 수 있음
                 await sio.emit("receive_chat", {"sender": "성불", "message": f"성불시킨 [{target.name}]님의 직업은 [{target.role.value}]였습니다.", "type": "system"}, room=pid)
 
-        # 건달 협박 알림 (Private)
         for p in game.players.values():
             if p.is_alive and p.is_threatened:
                 await sio.emit("receive_chat", {"sender": "협박", "message": "건달에게 협박을 당하여 투표를 할 수 없습니다!", "type": "system"}, room=p.player_id)
 
-        # 군인 방탄 알림 (Private)
         for p in game.players.values():
             if p.is_alive and p.role == Role.SOLDIER and p.is_bulletproof_used:
-                # 이번 밤에 처음 방탄이 소모되었다면 알림 (로직상Armor 체크 필요할 수 있으나 단순화)
                 await sio.emit("receive_chat", {"sender": "군인", "message": "마피아의 공격을 버텨냈습니다!", "type": "system"}, room=p.player_id)
 
         game.process_night_actions()
@@ -322,7 +318,7 @@ async def send_chat(sid, data):
             if p.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted):
                 c_data["type"] = "mafia"
                 for pid, x in game.players.items():
-                    if x.role == Role.MAFIA or (x.role in [Role.SPY, Role.BEAST_MAN] and x.is_contacted): await sio.emit("receive_chat", c_data, room=pid)
+                    if x.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and x.is_contacted): await sio.emit("receive_chat", c_data, room=pid)
             elif p.role == Role.LOVERS:
                 c_data["type"] = "lovers"
                 for pid, x in game.players.items():
