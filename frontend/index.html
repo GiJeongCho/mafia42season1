@@ -14,7 +14,7 @@
         .btn:hover { background-color: #444; transform: translateY(-1px); }
         .btn-primary { background-color: #b71c1c; }
         .btn-primary:hover { background-color: #d32f2f; }
-        .log-entry { font-size: 0.8rem; border-bottom: 1px solid #2a2a2a; padding: 0.3rem 0; color: #888; }
+        .chat-entry { font-size: 0.85rem; padding: 0.2rem 0; }
         .role-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
         .role-mafia { background-color: #c62828; color: white; }
         .role-citizen { background-color: #2e7d32; color: white; }
@@ -22,6 +22,7 @@
         .chat-mafia { color: #ff5252; font-weight: bold; }
         .chat-dead { color: #9e9e9e; font-style: italic; }
         .chat-lovers { color: #f48fb1; font-weight: bold; }
+        .chat-system { color: #ffeb3b; font-weight: bold; }
         .player-dead { opacity: 0.4; filter: grayscale(1); }
         .mafia-teammate { border: 2px solid #ff1744 !important; box-shadow: 0 0 10px #ff1744; }
         .mafia-target { border: 3px solid #ff1744 !important; box-shadow: 0 0 20px #ff1744; animation: blink 0.8s infinite; }
@@ -30,7 +31,6 @@
         #game-guide { background: rgba(0,0,0,0.95); z-index: 1000; }
         .role-image-box { width: 100%; height: 150px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #444; }
         .role-image { width: 100%; height: 100%; object-fit: contain; }
-        .player-item { position: relative; transition: all 0.3s; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
@@ -41,25 +41,24 @@
 </head>
 <body class="p-4 flex flex-col">
     <!-- 게임 가이드 모달 -->
-    <div id="game-guide" class="fixed inset-0 hidden overflow-y-auto p-4 md:p-10">
+    <div id="game-guide" class="fixed inset-0 hidden overflow-y-auto p-4 md:p-10 text-left">
         <div class="bg-[#1a1a1a] p-8 rounded-xl max-w-4xl mx-auto shadow-2xl border border-[#333]">
-            <div class="flex justify-between items-center mb-6 border-b border-[#333] pb-4">
+            <div class="flex justify-between items-center mb-6 border-b border-[#333] pb-4 text-left">
                 <h2 class="text-3xl font-bold text-red-600">Mafia 42 가이드</h2>
                 <button onclick="toggleGuide()" class="text-gray-500 hover:text-white text-2xl">✕</button>
             </div>
             <div class="space-y-8 text-sm leading-relaxed text-gray-300 overflow-y-auto max-h-[70vh] pr-4 scrollbar-hide">
-                <!-- 마피아 팀 -->
                 <section>
                     <h3 class="text-xl font-black text-red-500 mb-4 border-l-4 border-red-500 pl-2">🔫 마피아 팀 (Villains)</h3>
-                    <p class="mb-4 text-gray-400 italic">목표: 거짓말과 선동으로 시민들을 혼란에 빠뜨리고, 모두 처형하십시오.</p>
+                    <p class="mb-4">목표: 거짓말과 선동으로 시민들을 혼란에 빠뜨리고, 모두 처형하십시오.</p>
                     
                     <div class="space-y-6">
                         <div>
                             <h4 class="font-bold text-lg text-white">1. 마피아 (Mafia)</h4>
                             <p class="text-red-400 font-bold mb-1">능력: [밤] 매일 밤 한 명을 선택하여 제거할 수 있습니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
-                                <p>밤에는 동료 마피아와 상의하여 누구를 죽일지 결정하세요. 마피아는 서로의 타겟을 실시간으로 확인할 수 있으며, **가장 마지막에 선택된 대상**이 최종 공격 대상이 됩니다.</p>
+                                <p>밤에는 동료 마피아와 상의하여 누구를 죽일지 결정하세요.</p>
                                 <p>낮에는 시민인 척 연기해야 합니다. 주로 **'경찰'**이나 **'의사'**를 사칭하여 시민들을 속이는 것이 기본 전략입니다.</p>
                                 <p>너무 조용하면 의심받습니다. 적당히 수사에 협조하는 척하십시오.</p>
                             </div>
@@ -67,7 +66,7 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">2. 스파이 (Spy)</h4>
                             <p class="text-red-400 font-bold mb-1">능력: [밤] 매일 밤 한 명을 선택하여 직업을 알아냅니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>당신의 최우선 목표는 **'마피아를 찾는 것(접선)'**입니다. 마피아를 찾으면 팀이 되어 밤에 대화할 수 있습니다.</p>
                                 <p>군인을 조사하면 군인에게 들키게 되니 주의하세요.</p>
@@ -77,7 +76,7 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">3. 짐승인간 (Beast Man)</h4>
                             <p class="text-red-400 font-bold mb-1">능력: [밤] 마피아에게 지목당해도 죽지 않으며, 마피아를 선택하면 접선합니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>마피아가 실수로 당신을 쏘게 유도하여 탄환을 낭비시키는 것도 전략입니다.</p>
                                 <p>접선에 성공하면 마피아가 모두 죽은 뒤, 당신이 시민들을 습격할 수 있습니다.</p>
@@ -87,26 +86,25 @@
                     </div>
                 </section>
 
-                <!-- 시민 팀 핵심 -->
                 <section>
                     <h3 class="text-xl font-black text-blue-500 mb-4 border-l-4 border-blue-500 pl-2">🚓 시민 팀 (Citizens) - 핵심 직업</h3>
-                    <p class="mb-4 text-gray-400 italic">목표: 추리와 능력을 통해 마피아를 찾아내고, 투표로 심판하십시오.</p>
+                    <p class="mb-4 text-gray-400">목표: 추리와 능력을 통해 마피아를 찾아내고, 투표로 심판하십시오.</p>
                     
                     <div class="space-y-6">
                         <div>
                             <h4 class="font-bold text-lg text-white">4. 경찰 (Police)</h4>
                             <p class="text-blue-400 font-bold mb-1">능력: [밤] 매일 밤 한 명을 선택하여 마피아 여부를 확인합니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>당신은 시민 팀의 리더입니다. 마피아를 발견하면 즉시 낮에 알려야 합니다.</p>
                                 <p>첫날 바로 자신이 경찰임을 밝히고(경크/노마), 의사의 보호를 요청하는 것이 정석입니다.</p>
-                                <p>스파이와 짐승인간은 수사해도 찾을 수 없으니 방심하지 마세요. 당신은 **'마피아'**만 찾아낼 수 있습니다.</p>
+                                <p>스파이와 짐승인간은 수사해도 찾을 수 없으니 방심하지 마세요.</p>
                             </div>
                         </div>
                         <div>
                             <h4 class="font-bold text-lg text-white">5. 의사 (Doctor)</h4>
                             <p class="text-blue-400 font-bold mb-1">능력: [밤] 매일 밤 한 명을 선택하여 마피아의 공격으로부터 치료합니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>당신의 손에 시민 팀의 운명이 달려 있습니다. 중요한 역할을 맡은 시민(주로 경찰)을 치료하세요.</p>
                                 <p>눈치싸움이 힘들다면 자기 자신을 치료(자힐)하여 생존을 도모할 수도 있습니다.</p>
@@ -116,16 +114,15 @@
                     </div>
                 </section>
 
-                <!-- 시민 팀 특수 -->
                 <section>
                     <h3 class="text-xl font-black text-green-500 mb-4 border-l-4 border-green-500 pl-2">🛡️ 시민 팀 (Citizens) - 특수 직업</h3>
-                    <p class="mb-4 text-gray-400 italic">목표: 고유한 능력으로 시민 팀을 보조하고, 결정적인 순간에 활약하십시오.</p>
+                    <p class="mb-4 text-gray-400">목표: 고유한 능력으로 시민 팀을 보조하고, 결정적인 순간에 활약하십시오.</p>
                     
                     <div class="space-y-6">
                         <div>
                             <h4 class="font-bold text-lg text-white">6. 군인 (Soldier)</h4>
                             <p class="text-green-400 font-bold mb-1">능력: [패시브] 마피아의 공격을 1회 버텨냅니다. 스파이가 조사하면 그 정체를 알 수 있습니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>방탄조끼를 믿고 과감하게 행동하세요. 마피아가 당신을 쏘게 만드는 것이 이득입니다.</p>
                                 <p>밤에 누군가 당신을 조사했다는 알림이 뜬다면, 그 사람은 무조건 **'스파이'**입니다. 즉시 고발하세요!</p>
@@ -134,7 +131,7 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">7. 정치인 (Politician)</h4>
                             <p class="text-green-400 font-bold mb-1">능력: [투표] 투표로 처형당하지 않으며, 투표 시 2표의 권한을 가집니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>당신은 논리의 왕입니다. 억울하게 몰려 투표를 받아도 죽지 않습니다.</p>
                                 <p>이 능력을 역이용해 마피아를 안심시킨 뒤, 결정적인 투표 순간에 2표를 행사하여 마피아를 보내버리세요.</p>
@@ -144,7 +141,7 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">8. 건달 (Gangster)</h4>
                             <p class="text-green-400 font-bold mb-1">능력: [밤] 한 명을 선택하여 협박합니다. 협박당한 사람은 다음 날 투표권이 박탈됩니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>수상한 사람의 입(투표)을 막으세요. 특히 마피아로 의심되는 자가 투표로 판세를 뒤집으려 할 때 효과적입니다.</p>
                                 <p>함부로 능력을 쓰면 경찰이나 의사의 투표권을 뺏을 수도 있으니 신중해야 합니다.</p>
@@ -154,7 +151,7 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">9. 사립탐정 (Detective)</h4>
                             <p class="text-green-400 font-bold mb-1">능력: [밤] 한 명을 선택하여 그 사람이 밤에 누구에게 능력을 썼는지(손) 확인합니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>마피아로 의심되는 사람을 조사하세요. 그가 살해당한 피해자를 찍었다면, 그가 범인입니다.</p>
                                 <p>반대로 의심받는 사람이 아무 행동도 안 했다면, 누명을 벗겨줄 수도 있습니다.</p>
@@ -163,7 +160,7 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">10. 기자 (Reporter)</h4>
                             <p class="text-green-400 font-bold mb-1">능력: [밤] 한 명을 취재하여 다음 날 아침 모든 사람에게 그의 직업을 공개합니다. (1회용, 첫날 불가)</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>당신의 펜은 칼보다 강합니다. 서로 경찰이라고 우기는 두 사람 중 한 명을 취재하면 게임이 끝납니다.</p>
                                 <p>기회는 단 한 번뿐입니다. 가장 혼란스러운 순간에 팩트를 터트리세요.</p>
@@ -172,7 +169,7 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">11. 영매 (Medium)</h4>
                             <p class="text-green-400 font-bold mb-1">능력: [밤] 죽은 사람들의 대화를 들을 수 있습니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
                                 <p>억울하게 죽은 경찰이나 의사가 남기는 유언을 살아있는 사람들에게 전달하세요.</p>
                                 <p>죽은 자는 거짓말을 하지 않습니다. 그들의 정보는 100% 진실입니다.</p>
@@ -181,9 +178,9 @@
                         <div>
                             <h4 class="font-bold text-lg text-white">12. 연인 (Lovers)</h4>
                             <p class="text-green-400 font-bold mb-1">능력: [패시브] 서로가 연인임을 알며, 밤에 둘만의 대화가 가능합니다.</p>
-                            <div class="text-gray-400 space-y-1">
+                            <div class="text-gray-400 mt-2 space-y-2">
                                 <p class="font-bold text-gray-200">가이드:</p>
-                                <p>두 사람은 운명 공동체입니다. 한 명이 죽으면 나머지 한 명도 따라 죽습니다. 마피아의 총을 대신 맞아줄 수 있습니다.</p>
+                                <p>두 사람은 운명 공동체입니다. 한 명이 죽으면 나머지 한 명도 따라 죽습니다.</p>
                                 <p>서로의 정체를 확실히 아는 유일한 시민입니다. 이 신뢰를 바탕으로 다른 시민들을 설득하세요.</p>
                             </div>
                         </div>
@@ -199,16 +196,16 @@
             <button onclick="toggleGuide()" class="btn btn-primary text-xs px-3 py-1">📜 가이드</button>
         </header>
 
-        <main class="flex-1 flex flex-col overflow-hidden">
+        <main class="flex-1 flex flex-col overflow-hidden text-center">
             <!-- 1. 입장 섹션 -->
-            <div id="entry-section" class="max-w-md mx-auto w-full card mt-20 text-center">
-                <h2 class="text-xl mb-6 font-bold text-white">닉네임 입력</h2>
+            <div id="entry-section" class="max-w-md mx-auto w-full card mt-20">
+                <h2 class="text-xl mb-6 font-bold text-white text-center">닉네임 입력</h2>
                 <input type="text" id="nickname-input" maxlength="8" class="w-full bg-gray-800 text-white p-4 rounded-lg text-center border border-gray-700 mb-4 focus:border-red-600 outline-none">
                 <button onclick="setNickname()" class="btn btn-primary w-full p-4 font-black">입장</button>
             </div>
 
             <!-- 2. 로비 섹션 -->
-            <div id="lobby-section" class="card hidden max-w-2xl mx-auto w-full">
+            <div id="lobby-section" class="card hidden max-w-2xl mx-auto w-full text-center">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">로비</h2>
                     <button onclick="createRoom()" class="btn btn-primary">➕ 방 만들기</button>
@@ -223,13 +220,13 @@
             </div>
 
             <!-- 3. 대기실 섹션 -->
-            <div id="waiting-room-section" class="card hidden w-full flex-1 overflow-hidden flex flex-col">
+            <div id="waiting-room-section" class="card hidden w-full flex-1 overflow-hidden flex flex-col text-center">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-black text-yellow-500" id="display-room-id">대기실</h2>
                     <button onclick="location.reload()" class="btn bg-gray-700 text-xs">나가기</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 overflow-hidden">
-                    <div class="flex flex-col overflow-hidden">
+                    <div class="flex flex-col overflow-hidden text-left">
                         <h3 class="font-bold mb-2">참가자 (<span id="player-count">0</span>/12)</h3>
                         <ul id="player-list-lobby" class="flex-1 overflow-y-auto space-y-2 bg-black/20 p-4 rounded-xl border border-gray-800"></ul>
                     </div>
@@ -245,7 +242,7 @@
             </div>
 
             <!-- 4. 게임 화면 섹션 -->
-            <div id="game-section" class="hidden flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
+            <div id="game-section" class="hidden flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden text-left">
                 <!-- 왼쪽 사이드바 -->
                 <div class="lg:w-1/4 flex flex-col gap-4 overflow-hidden">
                     <div class="card">
@@ -262,9 +259,11 @@
                         </div>
                     </div>
                     
-                    <div class="card flex-1 flex flex-col overflow-hidden">
-                        <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase tracking-tighter">로그</h3>
-                        <div id="game-logs" class="flex-1 overflow-y-auto text-[10px] space-y-1"></div>
+                    <div class="card flex-1 flex flex-col overflow-hidden bg-black/20 border-gray-800/50">
+                        <h3 class="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-[0.2em]">시스템 가이드</h3>
+                        <div class="text-[11px] text-gray-400 leading-relaxed">
+                            채팅창의 [시스템] 메시지를 확인하세요.
+                        </div>
                     </div>
                 </div>
 
@@ -279,7 +278,7 @@
                         </div>
                     </div>
 
-                    <!-- 채팅창 -->
+                    <!-- 채팅창 (시스템 로그 통합) -->
                     <div class="card flex-[2] flex flex-col overflow-hidden bg-black/40">
                         <div class="flex justify-between items-center mb-2 border-b border-gray-800 pb-2">
                             <h3 id="state-text" class="text-xl font-black text-white">상태 대기 중...</h3>
@@ -288,7 +287,7 @@
                                 <button id="back-to-lobby-btn" onclick="backToLobby()" class="hidden bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-bold">대기실로 돌아가기 (방장)</button>
                             </div>
                         </div>
-                        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
+                        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-hide"></div>
                         <div class="flex gap-2 p-2 bg-gray-900/50 rounded-lg mt-2">
                             <input type="text" id="chat-input" class="bg-transparent text-white p-2 flex-1 outline-none text-sm" placeholder="메시지 입력...">
                             <button onclick="sendChat()" class="btn btn-primary px-6 font-black">전송</button>
@@ -347,7 +346,6 @@
             document.getElementById('game-section').classList.add('hidden');
             document.getElementById('waiting-room-section').classList.remove('hidden');
             document.getElementById('chat-messages').innerHTML = "";
-            document.getElementById('game-logs').innerHTML = "";
             document.getElementById('my-role-image-container').classList.add('hidden');
             document.getElementById('back-to-lobby-btn').classList.add('hidden');
         });
@@ -396,8 +394,10 @@
             const cb = document.getElementById('chat-messages'); if (!cb) return;
             const e = document.createElement('div');
             const icon = data.type === 'mafia' ? '🔫 ' : (data.type === 'lovers' ? '💕 ' : (data.type === 'dead' ? '💀 ' : ''));
-            e.className = `text-sm mb-1 p-2 rounded chat-${data.type} ${data.sender === myNickname ? 'bg-white/5 border-l-2 border-red-600' : ''}`;
-            e.innerHTML = `<strong class="opacity-60">${icon}${data.sender}:</strong> <span class="ml-1">${data.message}</span>`;
+            const isSys = data.sender === "시스템";
+            e.className = `chat-entry ${isSys ? 'chat-system' : 'chat-' + data.type} ${data.sender === myNickname ? 'bg-white/5 border-l-2 border-red-600' : ''}`;
+            if (isSys) e.innerHTML = `<span>[${data.sender}] ${data.message}</span>`;
+            else e.innerHTML = `<strong class="opacity-60">${icon}${data.sender}:</strong> <span class="ml-1">${data.message}</span>`;
             cb.appendChild(e); cb.scrollTop = cb.scrollHeight;
         });
         function sendChat() { const i = document.getElementById('chat-input'); if (!i.value.trim()) return; socket.emit('send_chat', { message: i.value.trim() }); i.value = ''; }
@@ -429,11 +429,14 @@
         }
         function saveMemo(id, m) { socket.emit('update_memo', { target_id: id, memo: m }); }
         function judgement(y) { socket.emit('judgement_vote', { is_yes: y }); document.getElementById('judgement-ui').classList.add('hidden'); }
+        function addLog(s, m) { socket.emit('send_chat', { message: m, type: 'system' }); } // 로그를 시스템 채팅으로 전송 (백엔드 처리 필요 없으나 프론트에서 채팅으로 보냄)
+        // 위 addLog는 프론트엔드 내부 receive_chat을 직접 호출하는 방식으로 변경
         function addLog(s, m) {
-            const l = document.getElementById('game-logs'); if (!l) return;
-            const e = document.createElement('div'); e.className = 'log-entry';
-            e.innerHTML = `<span class="opacity-40">[${new Date().toLocaleTimeString('ko-KR', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'})}]</span> ${m}`;
-            l.appendChild(e); l.scrollTop = l.scrollHeight;
+            const cb = document.getElementById('chat-messages'); if (!cb) return;
+            const e = document.createElement('div');
+            e.className = `chat-entry chat-system`;
+            e.innerHTML = `<span>[${s}] ${m}</span>`;
+            cb.appendChild(e); cb.scrollTop = cb.scrollHeight;
         }
         function toggleGuide() { const g = document.getElementById('game-guide'); if (g) g.classList.toggle('hidden'); }
         socket.on('vote_tally', (d) => {
@@ -444,9 +447,9 @@
         socket.on('memo_updated', (d) => { memos[d.target_id] = d.memo; updatePlayerActionList(); });
         socket.on('investigation_result', (d) => { alert(d.message); addLog("조사", d.message); });
         socket.on('morning_results', (data) => {
-            const l = document.getElementById('game-logs'); if (l) { data.logs.forEach(x => { const e = document.createElement('div'); e.className = 'log-entry'; e.innerText = x; l.appendChild(e); }); l.scrollTop = l.scrollHeight; }
-            const deadMsg = data.dead.length > 0 ? "💀 사망자: " + data.dead.join(', ') : "🕊️ 지난밤 아무도 죽지 않았습니다.";
-            addLog("시스템", deadMsg); alert("아침이 밝았습니다.\n" + deadMsg);
+            data.logs.forEach(x => { addLog("기록", x); });
+            const msg = data.dead.length > 0 ? "💀 사망자: " + data.dead.join(', ') : "🕊️ 지난밤 아무도 죽지 않았습니다.";
+            addLog("시스템", msg); alert("아침이 밝았습니다.\n" + msg);
         });
         socket.on('game_over', (data) => { 
             alert("🏁 게임 종료! 승리 팀: " + data.winner);
