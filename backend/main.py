@@ -200,9 +200,9 @@ async def process_night_auto(room_id):
             if not target: continue
             if player.role == Role.POLICE:
                 res = "마피아입니다." if target.role == Role.MAFIA else "마피아가 아닙니다."
-                await sio.emit("investigation_result", {"message": f"조사 결과: {target.name}님은 {res}"}, room=pid)
+                await sio.emit("investigation_result", {"message": f"[{target.name}]님은 {res}"}, room=pid)
             elif player.role == Role.SPY:
-                await sio.emit("investigation_result", {"message": f"조사 결과: {target.name}님의 직업은 {target.role.value}입니다."}, room=pid)
+                await sio.emit("investigation_result", {"message": f"조사하신 [{target.name}]님의 직업은 [{target.role.value}]입니다."}, room=pid)
 
         game.process_night_actions()
         game.timer = 5 # MORNING 지속 시간
@@ -211,7 +211,9 @@ async def process_night_auto(room_id):
         
         winner = game.check_victory()
         if winner:
-            await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민"}, room=room_id)
+            # 게임 종료 시 모든 직업 공개를 위해 플레이어 데이터에 직업 포함
+            all_roles = {p.player_id: p.role.value for p in game.players.values()}
+            await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민", "roles": all_roles}, room=room_id)
             game.state = GameState.FINISHED
         else:
             await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
@@ -261,7 +263,7 @@ async def process_judgement_results(room_id):
     if yes_votes > no_votes:
         nominee = game.players[game.nominee_id]
         if nominee.role == Role.POLITICIAN:
-            await sio.emit("system_message", {"message": f"{nominee.name}님은 정치인이므로 투표로 죽일 수 없습니다!"}, room=room_id)
+            await sio.emit("system_message", {"message": f"[{nominee.name}]님은 정치인이므로 투표로 죽일 수 없습니다."}, room=room_id)
         else:
             game.kill_player(nominee, "투표 처형", reveal=True)
             await sio.emit("system_message", {"message": f"{nominee.name}님이 처형되었습니다. 직업은 [{nominee.role.value}]였습니다."}, room=room_id)
@@ -354,7 +356,12 @@ async def night_action(sid, data):
 
             if game.has_night_ability(player.role):
                 target_name = target.name if target else "알 수 없음"
+                # 개별 알림
                 await sio.emit("action_confirmed", {"message": f"[{target_name}]님을 선택하였습니다.", "target_name": target_name}, room=sid)
+                
+                # 군인 방첩 알림 (스파이가 조사했을 때만)
+                if player.role == Role.SPY and target and target.role == Role.SOLDIER:
+                    await sio.emit("receive_chat", {"sender": "방첩", "message": f"[{player.name}]님이 당신을 조사했습니다!", "type": "normal"}, room=target_id)
     except Exception as e:
         logger.error(f"Error in night_action: {e}")
 
