@@ -168,9 +168,15 @@ async def process_night_auto(room_id):
                 if target.role == Role.SOLDIER:
                     await sio.emit("receive_chat", {"sender": "방첩", "message": f"[{p.name}]님이 당신을 조사했습니다!", "type": "system"}, room=target.player_id)
             elif p.role == Role.DETECTIVE:
-                hand = target.target_id
-                hand_name = game.players[hand].name if hand and hand in game.players else "아무런 행동도 하지 않음"
-                await sio.emit("receive_chat", {"sender": "추리", "message": f"지난 밤 [{target.name}]님은 [{hand_name}]님에게 손을 댔습니다.", "type": "system"}, room=pid)
+                # 사립탐정 조사 로직 (손을 본다)
+                hand_target_id = target.target_id
+                if hand_target_id:
+                    goal_p = game.players.get(hand_target_id)
+                    goal_name = goal_p.name if goal_p else "알 수 없음"
+                    msg = f"지난 밤 [{target.name}]님은 [{goal_name}]님에게 손을 댔습니다!"
+                else:
+                    msg = f"지난 밤 [{target.name}]님은 아무런 행동도 하지 않았습니다."
+                await sio.emit("receive_chat", {"sender": "추리", "message": msg, "type": "system"}, room=pid)
             elif p.role == Role.MEDIUM and not target.is_alive:
                 await sio.emit("receive_chat", {"sender": "성불", "message": f"성불시킨 [{target.name}]님의 직업은 [{target.role.value}]였습니다.", "type": "system"}, room=pid)
 
