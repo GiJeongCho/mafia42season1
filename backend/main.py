@@ -198,11 +198,24 @@ async def process_night_auto(room_id):
             all_roles = {p.player_id: p.role.value for p in game.players.values()}
             await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민", "roles": all_roles}, room=room_id)
             game.state = GameState.FINISHED
+            # 10초 후 자동으로 대기실로 이동
+            asyncio.create_task(auto_back_to_lobby(room_id))
         else:
             game.timer = 5 # MORNING
             await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
     except Exception as e:
         logger.error(f"Error in process_night_auto: {e}")
+
+async def auto_back_to_lobby(room_id):
+    """게임 종료 후 일정 시간 뒤에 자동으로 대기실로 복귀"""
+    await asyncio.sleep(10) # 10초 동안 결과 확인 시간 부여
+    if room_id in rooms:
+        game = rooms[room_id]
+        if game.state == GameState.FINISHED:
+            game.reset_game_state()
+            await sio.emit("returned_to_lobby", room=room_id)
+            await broadcast_player_list(room_id)
+            await sio.emit("receive_chat", {"sender": "시스템", "message": "게임이 종료되어 대기실로 자동 이동되었습니다.", "type": "system"}, room=room_id)
 
 async def process_voting_results(room_id):
     if room_id not in rooms: return
@@ -249,6 +262,8 @@ async def process_judgement_results(room_id):
         all_roles = {p.player_id: p.role.value for p in game.players.values()}
         await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민", "roles": all_roles}, room=room_id)
         game.state = GameState.FINISHED
+        # 10초 후 자동으로 대기실로 이동
+        asyncio.create_task(auto_back_to_lobby(room_id))
     else:
         game.state = GameState.NIGHT
         game.day_count += 1
