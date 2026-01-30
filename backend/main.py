@@ -162,23 +162,17 @@ async def process_night_auto(room_id):
             
             if p.role == Role.POLICE:
                 res = "마피아입니다." if target.role == Role.MAFIA else "마피아가 아닙니다."
-                await sio.emit("receive_chat", {"sender": "수사", "message": f"[{target.name}]님은 {res}", "type": "system"}, room=pid)
+                await sio.emit("investigation_result", {"message": f"[{target.name}]님은 {res}"}, room=pid)
             elif p.role == Role.SPY:
-                await sio.emit("receive_chat", {"sender": "첩보", "message": f"조사하신 [{target.name}]님의 직업은 [{target.role.value}]입니다.", "type": "system"}, room=pid)
+                await sio.emit("investigation_result", {"message": f"조사하신 [{target.name}]님의 직업은 [{target.role.value}]입니다."}, room=pid)
                 if target.role == Role.SOLDIER:
                     await sio.emit("receive_chat", {"sender": "방첩", "message": f"[{p.name}]님이 당신을 조사했습니다!", "type": "system"}, room=target.player_id)
             elif p.role == Role.DETECTIVE:
-                # 사립탐정 조사 로직 (손을 본다)
-                hand_target_id = target.target_id
-                if hand_target_id:
-                    goal_p = game.players.get(hand_target_id)
-                    goal_name = goal_p.name if goal_p else "알 수 없음"
-                    msg = f"지난 밤 [{target.name}]님은 [{goal_name}]님에게 손을 댔습니다!"
-                else:
-                    msg = f"지난 밤 [{target.name}]님은 아무런 행동도 하지 않았습니다."
-                await sio.emit("receive_chat", {"sender": "추리", "message": msg, "type": "system"}, room=pid)
+                hand = target.target_id
+                hand_name = game.players[hand].name if hand and hand in game.players else "아무런 행동도 하지 않음"
+                await sio.emit("investigation_result", {"message": f"지난 밤 [{target.name}]님은 [{hand_name}]님에게 손을 댔습니다."}, room=pid)
             elif p.role == Role.MEDIUM and not target.is_alive:
-                await sio.emit("receive_chat", {"sender": "성불", "message": f"성불시킨 [{target.name}]님의 직업은 [{target.role.value}]였습니다.", "type": "system"}, room=pid)
+                await sio.emit("investigation_result", {"message": f"성불시킨 [{target.name}]님의 직업은 [{target.role.value}]였습니다."}, room=pid)
 
         for p in game.players.values():
             if p.is_alive and p.is_threatened:
@@ -198,7 +192,6 @@ async def process_night_auto(room_id):
             all_roles = {p.player_id: p.role.value for p in game.players.values()}
             await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민", "roles": all_roles}, room=room_id)
             game.state = GameState.FINISHED
-            # 10초 후 자동으로 대기실로 이동
             asyncio.create_task(auto_back_to_lobby(room_id))
         else:
             game.timer = 5 # MORNING
@@ -207,8 +200,7 @@ async def process_night_auto(room_id):
         logger.error(f"Error in process_night_auto: {e}")
 
 async def auto_back_to_lobby(room_id):
-    """게임 종료 후 일정 시간 뒤에 자동으로 대기실로 복귀"""
-    await asyncio.sleep(10) # 10초 동안 결과 확인 시간 부여
+    await asyncio.sleep(10)
     if room_id in rooms:
         game = rooms[room_id]
         if game.state == GameState.FINISHED:
@@ -262,7 +254,6 @@ async def process_judgement_results(room_id):
         all_roles = {p.player_id: p.role.value for p in game.players.values()}
         await sio.emit("game_over", {"winner": "마피아" if winner == Team.MAFIA else "시민", "roles": all_roles}, room=room_id)
         game.state = GameState.FINISHED
-        # 10초 후 자동으로 대기실로 이동
         asyncio.create_task(auto_back_to_lobby(room_id))
     else:
         game.state = GameState.NIGHT
@@ -273,7 +264,13 @@ async def process_judgement_results(room_id):
 @sio.event
 async def update_memo(sid, data):
     room_id = player_to_room.get(sid)
-    if room_id: rooms[room_id].players[sid].memos[data.get("target_id")] = data.get("memo")
+    if not room_id: return
+    game = rooms[room_id]
+    target_id = data.get("target_id")
+    memo_text = data.get("memo")
+    if sid in game.players and target_id in game.players:
+        game.players[sid].memos[target_id] = memo_text
+        await sio.emit("memo_updated", {"target_id": target_id, "memo": memo_text}, room=sid)
 
 @sio.event
 async def vote(sid, data):
@@ -288,7 +285,10 @@ async def vote(sid, data):
 @sio.event
 async def judgement_vote(sid, data):
     room_id = player_to_room.get(sid)
-    if room_id: rooms[room_id].players[sid].is_judgement_yes = data.get("is_yes")
+    if not room_id: return
+    game = rooms[room_id]
+    if game.state == GameState.JUDGEMENT:
+        game.players[sid].is_judgement_yes = data.get("is_yes")
 
 @sio.event
 async def back_to_lobby(sid):
@@ -306,6 +306,7 @@ async def night_action(sid, data):
     try:
         tid = data.get("target_id")
         p = game.players.get(sid)
+        target = game.players.get(tid)
         if p and p.is_alive and game.state == GameState.NIGHT:
             p.target_id = tid
             is_m = (p.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted))
@@ -316,7 +317,7 @@ async def night_action(sid, data):
                     if mid != sid: await sio.emit("mafia_target_sync", {"attacker_id": sid, "target_id": tid}, room=mid)
             if game.has_night_ability(p.role):
                 t_name = game.players[tid].name if tid and tid in game.players else "아무도 아님"
-                await sio.emit("receive_chat", {"sender": "시스템", "message": f"[{t_name}]님을 선택하였습니다.", "type": "system"}, room=sid)
+                await sio.emit("action_confirmed", {"message": f"[{t_name}]님을 선택하였습니다.", "target_name": t_name}, room=sid)
     except Exception as e: logger.error(f"Error in night_action: {e}")
 
 @sio.event
@@ -339,7 +340,7 @@ async def send_chat(sid, data):
             if p.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and p.is_contacted):
                 c_data["type"] = "mafia"
                 for pid, x in game.players.items():
-                    if x.role == Role.MAFIA or (p.role in [Role.SPY, Role.BEAST_MAN] and x.is_contacted): await sio.emit("receive_chat", c_data, room=pid)
+                    if x.role == Role.MAFIA or (x.role in [Role.SPY, Role.BEAST_MAN] and x.is_contacted): await sio.emit("receive_chat", c_data, room=pid)
             elif p.role == Role.LOVERS:
                 c_data["type"] = "lovers"
                 for pid, x in game.players.items():
