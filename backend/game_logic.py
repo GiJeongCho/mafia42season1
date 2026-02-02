@@ -64,6 +64,7 @@ class MafiaGame:
         self.day_count = 1
         self.dead_last_night: List[str] = []
         self.logs: List[str] = []
+        self.contact_logs: List[str] = [] # 마피아 팀 전용 접선 로그
         self.reporter_used = False
         self.timer = 0
         self.nominee_id: Optional[str] = None 
@@ -174,13 +175,17 @@ class MafiaGame:
                     if target: target.is_threatened = True
 
             self.dead_last_night = []
+            self.contact_logs = []
             
-            # 2. 기자 특종 (살해 판정 전)
-            reporter_will_die = (self.mafia_target_id == reporter_p.player_id and self.mafia_target_id != doctor_target) if reporter_p and self.mafia_target_id else False
-            if reporter_p and reporter_p.target_id and self.day_count > 1 and not self.reporter_used:
+            # 2. 기자 특종 처리 (살아남아야 발동)
+            if reporter_p and reporter_p.target_id and self.day_count >= 1 and not self.reporter_used:
+                # 기자가 마피아에게 죽을 예정인지 체크 (의사 힐 제외)
+                reporter_will_die = (self.mafia_target_id == reporter_p.player_id and self.mafia_target_id != doctor_target) if self.mafia_target_id else False
+                
                 if not reporter_will_die:
                     target_p = self.players.get(reporter_p.target_id)
                     if target_p:
+                        # 중요: 여기서 revealed_role을 설정해야 main.py에서 player_list 업데이트 시 아이콘이 뜸
                         target_p.revealed_role = target_p.role
                         self.logs.append(f"[특종] {target_p.name}님의 직업은 [{target_p.role.value}]입니다!")
                         self.reporter_used = True
@@ -190,16 +195,25 @@ class MafiaGame:
             # 3. 짐승인간 접선 및 공격 특수 로직
             bm_player = next((p for p in self.players.values() if p.role == Role.BEAST_MAN and p.is_alive), None)
             if bm_player and not bm_player.is_contacted:
+                # 마피아가 짐승인간을 쏜 경우 접선
                 if self.mafia_target_id == bm_player.player_id:
                     bm_player.is_contacted = True
-                    self.logs.append("짐승인간이 마피아를 찾아내 접선했습니다.")
+                    self.contact_logs.append("짐승인간이 마피아의 총격에서 살아남아 접선했습니다.")
                     self.mafia_target_id = None
-                elif self.mafia_target_id and self.mafia_target_id == beastman_target:
+                # 짐승인간이 마피아를 쏜 경우 (추가된 룰)
+                elif beastman_target:
+                    target = self.players.get(beastman_target)
+                    if target and target.role == Role.MAFIA:
+                        bm_player.is_contacted = True
+                        self.contact_logs.append("짐승인간이 마피아를 찾아내 접선했습니다.")
+                
+                # 마피아와 짐승인간이 같은 대상을 쏜 경우 접선 및 습격
+                if not bm_player.is_contacted and self.mafia_target_id and self.mafia_target_id == beastman_target:
                     bm_player.is_contacted = True
                     target_player = self.players.get(self.mafia_target_id)
                     if target_player:
                         self.kill_player(target_player, "짐승인간의 습격", reveal=False)
-                        self.logs.append(f"짐승인간이 {target_player.name}님을 습격하며 마피아와 접선했습니다!")
+                        self.contact_logs.append(f"짐승인간이 {target_player.name}님을 습격하며 마피아와 접선했습니다!")
                     self.mafia_target_id = None
 
             # 4. 일반 마피아 공격 판정
@@ -245,7 +259,7 @@ class MafiaGame:
                 if not target: continue
                 if player.role == Role.SPY and target.role == Role.MAFIA:
                     player.is_contacted = True
-                    self.logs.append("스파이가 마피아를 찾아내 접선했습니다.")
+                    self.contact_logs.append("스파이가 마피아를 찾아내 접선했습니다.")
 
             # 상태 초기화
             for player in self.players.values():
@@ -305,6 +319,7 @@ class MafiaGame:
         self.day_count = 1
         self.dead_last_night = []
         self.logs = []
+        self.contact_logs = []
         self.reporter_used = False
         self.timer = 0
         self.nominee_id = None

@@ -183,6 +183,14 @@ async def process_night_auto(room_id):
                 await sio.emit("receive_chat", {"sender": "군인", "message": "마피아의 공격을 버텨냈습니다!", "type": "system"}, room=p.player_id)
 
         game.process_night_actions()
+        
+        # 접선 로그는 마피아 팀에게만 전송
+        if game.contact_logs:
+            mafia_team_ids = [p.player_id for p in game.players.values() if p.role in [Role.MAFIA, Role.SPY, Role.BEAST_MAN] and p.is_alive]
+            for log in game.contact_logs:
+                for mid in mafia_team_ids:
+                    await sio.emit("receive_chat", {"sender": "접선", "message": log, "type": "mafia"}, room=mid)
+
         for log in game.logs[-5:]:
             await sio.emit("receive_chat", {"sender": "시스템", "message": log, "type": "system"}, room=room_id)
         
