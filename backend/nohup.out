@@ -1,0 +1,436 @@
+/home/pps-nipa/NIQ/fish/side/g/mafia42season1/backend/main.py:388: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [124480]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8090 (Press CTRL+C to quit)
+INFO:     220.117.27.215:54863 - "GET / HTTP/1.1" 200 OK
+INFO:     220.117.27.215:54863 - "GET /socket.io/?EIO=4&transport=polling&t=PpHAw_8 HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: ZOYjn6Ofj0sc2UnwAAAB
+INFO:     220.117.27.215:54863 - "POST /socket.io/?EIO=4&transport=polling&t=PpHAw_v&sid=cc51IS7rPKRvMz5TAAAA HTTP/1.1" 200 OK
+INFO:     220.117.27.215:19539 - "GET /socket.io/?EIO=4&transport=polling&t=PpHAw_w&sid=cc51IS7rPKRvMz5TAAAA HTTP/1.1" 200 OK
+INFO:     220.117.27.215:8073 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=cc51IS7rPKRvMz5TAAAA" [accepted]
+INFO:     220.117.27.215:19539 - "GET /socket.io/?EIO=4&transport=polling&t=PpHAx0h&sid=cc51IS7rPKRvMz5TAAAA HTTP/1.1" 200 OK
+INFO:     220.117.27.215:19539 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     27.0.238.71:34766 - "GET / HTTP/1.1" 200 OK
+INFO:     106.101.195.119:41672 - "GET / HTTP/1.1" 200 OK
+INFO:     106.101.195.119:41672 - "GET /socket.io/?EIO=4&transport=polling&t=PpHB5S9 HTTP/1.1" 200 OK
+INFO:     106.101.195.119:41672 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client connected: T3SyePhLRYTHfO8UAAAD
+INFO:     106.101.195.119:45878 - "POST /socket.io/?EIO=4&transport=polling&t=PpHB5Sk&sid=DlH7qOhW3FJkiRd4AAAC HTTP/1.1" 200 OK
+INFO:     106.101.195.119:55020 - "GET /socket.io/?EIO=4&transport=polling&t=PpHB5Sl&sid=DlH7qOhW3FJkiRd4AAAC HTTP/1.1" 200 OK
+INFO:     106.101.195.119:14544 - "POST /socket.io/?EIO=4&transport=polling&t=PpHB7Id&sid=DlH7qOhW3FJkiRd4AAAC HTTP/1.1" 200 OK
+INFO:     106.101.195.119:55020 - "GET /socket.io/?EIO=4&transport=polling&t=PpHB5Tm&sid=DlH7qOhW3FJkiRd4AAAC HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: T3SyePhLRYTHfO8UAAAD
+INFO:     106.101.195.119:14544 - "POST /socket.io/?EIO=4&transport=polling&t=PpHB7eK&sid=DlH7qOhW3FJkiRd4AAAC HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_8647: 1 (ZOYjn6Ofj0sc2UnwAAAB)
+INFO:     211.235.96.217:48214 - "GET / HTTP/1.1" 200 OK
+INFO:     211.235.96.217:48214 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBA8Q HTTP/1.1" 200 OK
+INFO:     211.235.96.217:48214 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client connected: lPmnnfqOx8KJ6kQmAAAF
+INFO:     211.235.96.217:48224 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBA90&sid=H6Vz1eaaEfq1EW8vAAAE HTTP/1.1" 200 OK
+INFO:     211.235.96.217:48242 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBA91&sid=H6Vz1eaaEfq1EW8vAAAE HTTP/1.1" 200 OK
+INFO:     211.235.96.217:48230 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=H6Vz1eaaEfq1EW8vAAAE" [accepted]
+INFO:     211.235.96.217:48224 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBAA5&sid=H6Vz1eaaEfq1EW8vAAAE HTTP/1.1" 200 OK
+INFO:     211.235.96.217:48224 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBAAk&sid=H6Vz1eaaEfq1EW8vAAAE HTTP/1.1" 200 OK
+INFO:     106.101.195.119:35520 - "GET / HTTP/1.1" 200 OK
+INFO:     106.101.195.119:35520 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBHbI HTTP/1.1" 200 OK
+INFO:     106.101.195.119:35520 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client connected: qOu5tP8kbYhhfYq4AAAH
+INFO:     106.101.195.119:41754 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBHc8&sid=U2WInLaaK0R9hXaHAAAG HTTP/1.1" 200 OK
+INFO:     106.101.195.119:5596 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBHc9&sid=U2WInLaaK0R9hXaHAAAG HTTP/1.1" 200 OK
+INFO:     106.101.195.119:50374 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=U2WInLaaK0R9hXaHAAAG" [accepted]
+INFO:     106.101.195.119:5596 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBHdj&sid=U2WInLaaK0R9hXaHAAAG HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: lPmnnfqOx8KJ6kQmAAAF
+INFO:     211.235.96.217:48226 - "GET / HTTP/1.1" 200 OK
+INFO:     211.235.96.217:48226 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBJa- HTTP/1.1" 200 OK
+INFO:     211.235.96.217:51926 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client connected: eO8Imh6d1YM3oLIjAAAJ
+INFO:     211.235.96.217:48226 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBJbx&sid=5elPqwDnypmv0_s4AAAI HTTP/1.1" 200 OK
+INFO:     211.235.96.217:51926 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBJby&sid=5elPqwDnypmv0_s4AAAI HTTP/1.1" 200 OK
+INFO:     211.235.96.217:51932 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=5elPqwDnypmv0_s4AAAI" [accepted]
+INFO:     211.235.96.217:51926 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBJcp&sid=5elPqwDnypmv0_s4AAAI HTTP/1.1" 200 OK
+INFO:     211.235.96.217:51926 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBJdR&sid=5elPqwDnypmv0_s4AAAI HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_8647: 노무현 (qOu5tP8kbYhhfYq4AAAH)
+INFO:mafia_server:Client disconnected: eO8Imh6d1YM3oLIjAAAJ
+INFO:     211.235.96.217:51940 - "GET / HTTP/1.1" 200 OK
+INFO:     211.235.96.217:51940 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBO7b HTTP/1.1" 200 OK
+INFO:     211.235.96.217:46206 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client connected: YX9qc5kWO6sqg9jtAAAL
+INFO:     211.235.96.217:51940 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBO8L&sid=JXd4M1KpT11MV_cEAAAK HTTP/1.1" 200 OK
+INFO:     211.235.96.217:46206 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBO8M&sid=JXd4M1KpT11MV_cEAAAK HTTP/1.1" 200 OK
+INFO:     211.235.96.217:46222 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=JXd4M1KpT11MV_cEAAAK" [accepted]
+INFO:     211.235.96.217:46206 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBO92&sid=JXd4M1KpT11MV_cEAAAK HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50453 - "GET / HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50453 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBWHR HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: Yyt2_9hmLJR9jG0JAAAN
+INFO:     203.237.119.196:50453 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBWI8&sid=Kz_v40xOENZutFgkAAAM HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50454 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBWI9&sid=Kz_v40xOENZutFgkAAAM HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50465 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=Kz_v40xOENZutFgkAAAM" [accepted]
+INFO:     203.237.119.196:50454 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBWIj&sid=Kz_v40xOENZutFgkAAAM HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50454 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBWJF&sid=Kz_v40xOENZutFgkAAAM HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50454 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_game:Player added to room room_8647: 후기정 (Yyt2_9hmLJR9jG0JAAAN)
+INFO:mafia_game:Player added to room room_8647: 기정이팬티노란색 (YX9qc5kWO6sqg9jtAAAL)
+INFO:mafia_server:Client disconnected: YX9qc5kWO6sqg9jtAAAL
+INFO:     211.235.96.217:59800 - "GET / HTTP/1.1" 200 OK
+INFO:     211.235.96.217:59800 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBmEm HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: FkyW8TjSckmlpfImAAAP
+INFO:     211.235.96.217:59800 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBmFX&sid=CQY4hPNF0FOvWxOYAAAO HTTP/1.1" 200 OK
+INFO:     211.235.96.217:44480 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     211.235.96.217:18346 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=CQY4hPNF0FOvWxOYAAAO" [accepted]
+INFO:     211.235.96.217:44494 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBmFX.0&sid=CQY4hPNF0FOvWxOYAAAO HTTP/1.1" 200 OK
+INFO:     211.235.96.217:44494 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBmGg&sid=CQY4hPNF0FOvWxOYAAAO HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: FkyW8TjSckmlpfImAAAP
+INFO:     121.178.98.67:53449 - "GET / HTTP/1.1" 200 OK
+INFO:     121.178.98.67:53449 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBnKQ HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: U63bCDQFAf0ew-NKAAAR
+INFO:     121.178.98.67:53449 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBnMC&sid=O3xZ27FjCZra-ZQmAAAQ HTTP/1.1" 200 OK
+INFO:     121.178.98.67:51911 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBnME&sid=O3xZ27FjCZra-ZQmAAAQ HTTP/1.1" 200 OK
+INFO:     121.178.98.67:53449 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     121.178.98.67:62695 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=O3xZ27FjCZra-ZQmAAAQ" [accepted]
+INFO:     121.178.98.67:51911 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBnMg&sid=O3xZ27FjCZra-ZQmAAAQ HTTP/1.1" 200 OK
+INFO:     121.178.98.67:51911 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBnN2&sid=O3xZ27FjCZra-ZQmAAAQ HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_8753: 김대중 (U63bCDQFAf0ew-NKAAAR)
+INFO:     121.178.98.67:59473 - "GET / HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: U63bCDQFAf0ew-NKAAAR
+INFO:     121.178.98.67:59473 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBpvv HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: Ef9cpfy-2y-3GkZvAAAT
+INFO:     121.178.98.67:59473 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBpwE&sid=JVLjQTtT8kf9nri1AAAS HTTP/1.1" 200 OK
+INFO:     121.178.98.67:49666 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBpwF&sid=JVLjQTtT8kf9nri1AAAS HTTP/1.1" 200 OK
+INFO:     121.178.98.67:62154 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=JVLjQTtT8kf9nri1AAAS" [accepted]
+INFO:     121.178.98.67:49666 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBpwh&sid=JVLjQTtT8kf9nri1AAAS HTTP/1.1" 200 OK
+INFO:     211.235.96.217:14872 - "GET / HTTP/1.1" 200 OK
+INFO:     211.235.96.217:14872 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBsf5 HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: mB0NG3Cms_HXTMsQAAAV
+INFO:     211.235.96.217:14872 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBsfm&sid=v3d5u_x4uYBTTsXBAAAU HTTP/1.1" 200 OK
+INFO:     211.235.96.217:35024 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBsfn&sid=v3d5u_x4uYBTTsXBAAAU HTTP/1.1" 200 OK
+INFO:     211.235.96.217:35038 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=v3d5u_x4uYBTTsXBAAAU" [accepted]
+INFO:     211.235.96.217:35024 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBsgm&sid=v3d5u_x4uYBTTsXBAAAU HTTP/1.1" 200 OK
+INFO:     211.235.96.217:35024 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client disconnected: Ef9cpfy-2y-3GkZvAAAT
+INFO:mafia_server:Client disconnected: mB0NG3Cms_HXTMsQAAAV
+INFO:     211.235.96.217:52382 - "GET / HTTP/1.1" 200 OK
+INFO:     211.235.96.217:52382 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBwnN HTTP/1.1" 200 OK
+INFO:     211.235.96.217:52382 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client connected: 7DciEd__v99vg2eSAAAX
+INFO:     211.235.96.217:1096 - "POST /socket.io/?EIO=4&transport=polling&t=PpHBwoE&sid=1M_O4DySpdksx6EvAAAW HTTP/1.1" 200 OK
+INFO:     211.235.96.217:52412 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=1M_O4DySpdksx6EvAAAW" [accepted]
+INFO:     211.235.96.217:52382 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBwoG&sid=1M_O4DySpdksx6EvAAAW HTTP/1.1" 200 OK
+INFO:     211.235.96.217:52382 - "GET /socket.io/?EIO=4&transport=polling&t=PpHBwpV&sid=1M_O4DySpdksx6EvAAAW HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: qOu5tP8kbYhhfYq4AAAH
+INFO:mafia_server:Client disconnected: 7DciEd__v99vg2eSAAAX
+INFO:     211.235.96.217:34326 - "GET /socket.io/?EIO=4&transport=polling&t=PpHC3XE HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: D89429PPXtOQkqKhAAAZ
+INFO:     211.235.96.217:34326 - "POST /socket.io/?EIO=4&transport=polling&t=PpHC3Yn&sid=03lL1BtQ3kfb28_aAAAY HTTP/1.1" 200 OK
+INFO:     211.235.96.217:34348 - "GET /socket.io/?EIO=4&transport=polling&t=PpHC3Yo&sid=03lL1BtQ3kfb28_aAAAY HTTP/1.1" 200 OK
+INFO:     211.235.96.217:34338 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=03lL1BtQ3kfb28_aAAAY" [accepted]
+INFO:     211.235.96.217:34348 - "GET /socket.io/?EIO=4&transport=polling&t=PpHC3Zx&sid=03lL1BtQ3kfb28_aAAAY HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_8647: 기정이팬티노랑색 (D89429PPXtOQkqKhAAAZ)
+INFO:mafia_server:Client disconnected: D89429PPXtOQkqKhAAAZ
+INFO:     211.235.96.217:56836 - "GET /socket.io/?EIO=4&transport=polling&t=PpHC9II HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: eZSwoFDqAiULz3bTAAAb
+INFO:     211.235.96.217:56836 - "POST /socket.io/?EIO=4&transport=polling&t=PpHCC2-&sid=8aX34UvsVDbjOFOpAAAa HTTP/1.1" 200 OK
+INFO:     211.235.96.217:63438 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=8aX34UvsVDbjOFOpAAAa" [accepted]
+INFO:     211.235.96.217:46166 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCC2_&sid=8aX34UvsVDbjOFOpAAAa HTTP/1.1" 200 OK
+INFO:     211.235.96.217:46166 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCC4d&sid=8aX34UvsVDbjOFOpAAAa HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: eZSwoFDqAiULz3bTAAAb
+INFO:     106.101.195.119:40178 - "GET / HTTP/1.1" 200 OK
+INFO:     106.101.195.119:40178 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCN8s HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: sGuILic23Jvk-uO9AAAd
+INFO:     106.101.195.119:40178 - "POST /socket.io/?EIO=4&transport=polling&t=PpHCN9u&sid=BI7Qi7XqFzimGa4EAAAc HTTP/1.1" 200 OK
+INFO:     106.101.195.119:40188 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCN9y&sid=BI7Qi7XqFzimGa4EAAAc HTTP/1.1" 200 OK
+INFO:     106.101.195.119:40198 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=BI7Qi7XqFzimGa4EAAAc" [accepted]
+INFO:     106.101.195.119:40188 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCNAg&sid=BI7Qi7XqFzimGa4EAAAc HTTP/1.1" 200 OK
+INFO:     106.101.195.119:40188 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCNBc&sid=BI7Qi7XqFzimGa4EAAAc HTTP/1.1" 200 OK
+INFO:     106.101.195.119:40188 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     211.235.96.217:32166 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCQnr HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: e9StdMgU54XMGfvqAAAf
+INFO:     211.235.96.217:32166 - "POST /socket.io/?EIO=4&transport=polling&t=PpHCQoV&sid=jRPX7I0QwzEJaWmiAAAe HTTP/1.1" 200 OK
+INFO:     211.235.96.217:39894 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=jRPX7I0QwzEJaWmiAAAe" [accepted]
+INFO:     211.235.96.217:39906 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCQoW&sid=jRPX7I0QwzEJaWmiAAAe HTTP/1.1" 200 OK
+INFO:     211.235.96.217:39906 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCQpl&sid=jRPX7I0QwzEJaWmiAAAe HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: sGuILic23Jvk-uO9AAAd
+INFO:mafia_game:Player added to room room_8647: 기정이팬티노랑색 (e9StdMgU54XMGfvqAAAf)
+INFO:mafia_server:Client disconnected: e9StdMgU54XMGfvqAAAf
+INFO:     211.235.96.217:59302 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCToo HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: KInE8VxoxZ88KCCeAAAh
+INFO:     211.235.96.217:59302 - "POST /socket.io/?EIO=4&transport=polling&t=PpHCVZj&sid=AWKNu3vaW902IM9LAAAg HTTP/1.1" 200 OK
+INFO:     211.235.96.217:59302 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCVZk&sid=AWKNu3vaW902IM9LAAAg HTTP/1.1" 200 OK
+INFO:     211.235.96.217:59314 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=AWKNu3vaW902IM9LAAAg" [accepted]
+INFO:     211.235.96.217:59302 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCVa-&sid=AWKNu3vaW902IM9LAAAg HTTP/1.1" 200 OK
+INFO:     106.101.195.119:48174 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCXVZ HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: Y2PL_ThBJnuctJEdAAAj
+INFO:     106.101.195.119:48174 - "POST /socket.io/?EIO=4&transport=polling&t=PpHCXXd&sid=u7JkOPopKiWeipODAAAi HTTP/1.1" 200 OK
+INFO:     106.101.195.119:19144 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCXXf&sid=u7JkOPopKiWeipODAAAi HTTP/1.1" 200 OK
+INFO:     106.101.195.119:48180 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=u7JkOPopKiWeipODAAAi" [accepted]
+INFO:     106.101.195.119:19144 - "GET /socket.io/?EIO=4&transport=polling&t=PpHCXZI&sid=u7JkOPopKiWeipODAAAi HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_8647: 노무현웃터짐 (Y2PL_ThBJnuctJEdAAAj)
+INFO:mafia_server:Client disconnected: KInE8VxoxZ88KCCeAAAh
+INFO:mafia_server:Client disconnected: Y2PL_ThBJnuctJEdAAAj
+INFO:mafia_server:Client disconnected: ZOYjn6Ofj0sc2UnwAAAB
+INFO:     203.237.119.196:50766 - "GET / HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: Yyt2_9hmLJR9jG0JAAAN
+INFO:     203.237.119.196:50766 - "GET /socket.io/?EIO=4&transport=polling&t=PpHD6Ax HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: Ui7xKzAIBTLRJ0xvAAAl
+INFO:     203.237.119.196:50766 - "POST /socket.io/?EIO=4&transport=polling&t=PpHD6BC&sid=Y-ayv_KnBy3z5e4XAAAk HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50765 - "GET /socket.io/?EIO=4&transport=polling&t=PpHD6BD&sid=Y-ayv_KnBy3z5e4XAAAk HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50770 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=Y-ayv_KnBy3z5e4XAAAk" [accepted]
+INFO:     203.237.119.196:50765 - "GET /socket.io/?EIO=4&transport=polling&t=PpHD6BS&sid=Y-ayv_KnBy3z5e4XAAAk HTTP/1.1" 200 OK
+INFO:     203.237.119.196:50765 - "GET /socket.io/?EIO=4&transport=polling&t=PpHD6Bh&sid=Y-ayv_KnBy3z5e4XAAAk HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: Ui7xKzAIBTLRJ0xvAAAl
+INFO:     106.101.195.119:56942 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDe5R HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: UsMSc_yQLhNvzOmKAAAn
+INFO:     106.101.195.119:56942 - "POST /socket.io/?EIO=4&transport=polling&t=PpHDeBW&sid=Z8poLf53NzDhJou-AAAm HTTP/1.1" 200 OK
+INFO:     106.101.195.119:56970 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDeBa&sid=Z8poLf53NzDhJou-AAAm HTTP/1.1" 200 OK
+INFO:     106.101.195.119:55208 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=Z8poLf53NzDhJou-AAAm" [accepted]
+INFO:     106.101.195.119:56970 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDeDS&sid=Z8poLf53NzDhJou-AAAm HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: UsMSc_yQLhNvzOmKAAAn
+INFO:     106.101.195.119:56970 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDeg9 HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: r3Rcwq6RGw-h42GnAAAp
+INFO:     106.101.195.119:56970 - "POST /socket.io/?EIO=4&transport=polling&t=PpHDeh3&sid=94oDBfbi9HCgUJEGAAAo HTTP/1.1" 200 OK
+INFO:     106.101.195.119:56942 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDeh4&sid=94oDBfbi9HCgUJEGAAAo HTTP/1.1" 200 OK
+INFO:     106.101.195.119:45284 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=94oDBfbi9HCgUJEGAAAo" [accepted]
+INFO:     106.101.195.119:56942 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDehu&sid=94oDBfbi9HCgUJEGAAAo HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: r3Rcwq6RGw-h42GnAAAp
+INFO:     220.117.27.215:2197 - "GET / HTTP/1.1" 200 OK
+INFO:     220.117.27.215:19957 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDsdY HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: aSZG1ArQCh1K0Y3DAAAr
+INFO:     220.117.27.215:19957 - "POST /socket.io/?EIO=4&transport=polling&t=PpHDseK&sid=lMvNHW02eRhoJGfcAAAq HTTP/1.1" 200 OK
+INFO:     220.117.27.215:1929 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDseK.0&sid=lMvNHW02eRhoJGfcAAAq HTTP/1.1" 200 OK
+INFO:     220.117.27.215:6735 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=lMvNHW02eRhoJGfcAAAq" [accepted]
+INFO:     220.117.27.215:1929 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDsfJ&sid=lMvNHW02eRhoJGfcAAAq HTTP/1.1" 200 OK
+INFO:     220.117.27.215:1929 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     211.235.96.217:8082 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDuwb HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: NFtuz17uIYdvs7wHAAAt
+INFO:     211.235.96.217:8082 - "POST /socket.io/?EIO=4&transport=polling&t=PpHDuxp&sid=S6xQ8qpbSAODGQNRAAAs HTTP/1.1" 200 OK
+INFO:     211.235.96.217:36984 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=S6xQ8qpbSAODGQNRAAAs" [accepted]
+INFO:     211.235.96.217:42504 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDuxq&sid=S6xQ8qpbSAODGQNRAAAs HTTP/1.1" 200 OK
+INFO:     211.235.96.217:42504 - "GET /socket.io/?EIO=4&transport=polling&t=PpHDuyu&sid=S6xQ8qpbSAODGQNRAAAs HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: NFtuz17uIYdvs7wHAAAt
+INFO:mafia_server:Client disconnected: aSZG1ArQCh1K0Y3DAAAr
+INFO:     127.0.0.1:59750 - "GET / HTTP/1.1" 200 OK
+INFO:     220.117.27.215:29321 - "GET /socket.io/?EIO=4&transport=polling&t=PpHEr5F HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: MWLMXiiJbvESWeUAAAAv
+INFO:     220.117.27.215:29321 - "POST /socket.io/?EIO=4&transport=polling&t=PpHEr5u&sid=8hlRXJ6XH2mFQXhgAAAu HTTP/1.1" 200 OK
+INFO:     220.117.27.215:18324 - "GET /socket.io/?EIO=4&transport=polling&t=PpHEr5v&sid=8hlRXJ6XH2mFQXhgAAAu HTTP/1.1" 200 OK
+INFO:     220.117.27.215:50288 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=8hlRXJ6XH2mFQXhgAAAu" [accepted]
+INFO:     220.117.27.215:18324 - "GET /socket.io/?EIO=4&transport=polling&t=PpHEr6F&sid=8hlRXJ6XH2mFQXhgAAAu HTTP/1.1" 200 OK
+INFO:     220.117.27.215:18324 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client disconnected: MWLMXiiJbvESWeUAAAAv
+INFO:     211.231.103.107:60166 - "GET / HTTP/1.1" 200 OK
+INFO:     49.142.58.55:55101 - "GET / HTTP/1.1" 200 OK
+INFO:     49.142.58.55:55101 - "GET /socket.io/?EIO=4&transport=polling&t=PpHF9bv HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: I4R7Q4KIdOTf2CWPAAAx
+INFO:     49.142.58.55:55101 - "POST /socket.io/?EIO=4&transport=polling&t=PpHF9d2&sid=wDGz2cqKIJdh0cURAAAw HTTP/1.1" 200 OK
+INFO:     49.142.58.55:35914 - "GET /socket.io/?EIO=4&transport=polling&t=PpHF9d3&sid=wDGz2cqKIJdh0cURAAAw HTTP/1.1" 200 OK
+INFO:     49.142.58.55:55105 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=wDGz2cqKIJdh0cURAAAw" [accepted]
+INFO:     49.142.58.55:55101 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     49.142.58.55:55101 - "GET /socket.io/?EIO=4&transport=polling&t=PpHF9dV&sid=wDGz2cqKIJdh0cURAAAw HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_5899: 으아아아아아 (I4R7Q4KIdOTf2CWPAAAx)
+INFO:     61.253.115.73:62409 - "GET / HTTP/1.1" 200 OK
+INFO:     61.253.115.73:62409 - "GET /socket.io/?EIO=4&transport=polling&t=PpHFZ_e HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: ISWAWD9asLQagO2nAAAz
+INFO:     61.253.115.73:62409 - "POST /socket.io/?EIO=4&transport=polling&t=PpHFa0q&sid=fXWaN2ujRCRHJ0UnAAAy HTTP/1.1" 200 OK
+INFO:     61.253.115.73:65367 - "GET /socket.io/?EIO=4&transport=polling&t=PpHFa0r&sid=fXWaN2ujRCRHJ0UnAAAy HTTP/1.1" 200 OK
+INFO:     61.253.115.73:62409 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     61.253.115.73:49671 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=fXWaN2ujRCRHJ0UnAAAy" [accepted]
+INFO:     61.253.115.73:65367 - "GET /socket.io/?EIO=4&transport=polling&t=PpHFa1G&sid=fXWaN2ujRCRHJ0UnAAAy HTTP/1.1" 200 OK
+INFO:     61.253.115.73:65367 - "GET /socket.io/?EIO=4&transport=polling&t=PpHFa1Y&sid=fXWaN2ujRCRHJ0UnAAAy HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_6132: 응애 (ISWAWD9asLQagO2nAAAz)
+INFO:mafia_server:Client disconnected: ISWAWD9asLQagO2nAAAz
+INFO:     123.143.146.42:51219 - "GET / HTTP/1.1" 200 OK
+INFO:     123.143.146.42:51219 - "GET /socket.io/?EIO=4&transport=polling&t=PpHFz3b HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: LdQLrWmQ5ZH5GzYcAAA1
+INFO:     123.143.146.42:51219 - "POST /socket.io/?EIO=4&transport=polling&t=PpHFz4d&sid=N_CFeMjVmwcfnhrRAAA0 HTTP/1.1" 200 OK
+INFO:     123.143.146.42:12868 - "GET /socket.io/?EIO=4&transport=polling&t=PpHFz4e&sid=N_CFeMjVmwcfnhrRAAA0 HTTP/1.1" 200 OK
+INFO:     123.143.146.42:12645 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=N_CFeMjVmwcfnhrRAAA0" [accepted]
+INFO:     123.143.146.42:12868 - "GET /socket.io/?EIO=4&transport=polling&t=PpHFz4y&sid=N_CFeMjVmwcfnhrRAAA0 HTTP/1.1" 200 OK
+INFO:     123.143.146.42:12868 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:mafia_game:Player added to room room_5899: blackyak (LdQLrWmQ5ZH5GzYcAAA1)
+INFO:mafia_server:Client disconnected: I4R7Q4KIdOTf2CWPAAAx
+INFO:     193.142.146.230:44824 - "GET /login HTTP/1.1" 404 Not Found
+INFO:mafia_server:Client disconnected: LdQLrWmQ5ZH5GzYcAAA1
+INFO:     211.46.42.164:19167 - "GET / HTTP/1.1" 200 OK
+INFO:     211.46.42.164:19167 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXkEl HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: _DzBjzr5FPo0TTRMAAA3
+INFO:     211.46.42.164:19167 - "POST /socket.io/?EIO=4&transport=polling&t=PpHXkFB&sid=50cEUwDyqwQXA8vVAAA2 HTTP/1.1" 200 OK
+INFO:     211.46.42.164:21544 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXkFD&sid=50cEUwDyqwQXA8vVAAA2 HTTP/1.1" 200 OK
+INFO:     211.46.42.164:25238 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=50cEUwDyqwQXA8vVAAA2" [accepted]
+INFO:     211.46.42.164:19167 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXkF_&sid=50cEUwDyqwQXA8vVAAA2 HTTP/1.1" 200 OK
+INFO:     211.46.42.164:19167 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXkGP&sid=50cEUwDyqwQXA8vVAAA2 HTTP/1.1" 200 OK
+INFO:     211.46.42.164:19167 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXkGp&sid=50cEUwDyqwQXA8vVAAA2 HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: _DzBjzr5FPo0TTRMAAA3
+INFO:     211.46.42.164:43615 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXnEn HTTP/1.1" 200 OK
+INFO:     211.46.42.164:20127 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=rYvxB3OhQxMOjiBvAAA4" [accepted]
+INFO:mafia_server:Client connected: gqNL_A6Bl4N9TVFyAAA5
+INFO:     211.46.42.164:43615 - "POST /socket.io/?EIO=4&transport=polling&t=PpHXnFk&sid=rYvxB3OhQxMOjiBvAAA4 HTTP/1.1" 200 OK
+INFO:     211.46.42.164:28486 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXnFl&sid=rYvxB3OhQxMOjiBvAAA4 HTTP/1.1" 200 OK
+INFO:     211.46.42.164:43615 - "GET /socket.io/?EIO=4&transport=polling&t=PpHXnGf&sid=rYvxB3OhQxMOjiBvAAA4 HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: gqNL_A6Bl4N9TVFyAAA5
+INFO:     211.231.103.94:39840 - "GET / HTTP/1.1" 200 OK
+INFO:     182.226.49.148:50556 - "GET / HTTP/1.1" 200 OK
+INFO:     182.226.49.148:50556 - "GET /socket.io/?EIO=4&transport=polling&t=PpHa6HM HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: GajA0xM_gSbVmmvcAAA7
+INFO:     182.226.49.148:50556 - "POST /socket.io/?EIO=4&transport=polling&t=PpHa6Hn&sid=gjtmu9rQbUGjlI9LAAA6 HTTP/1.1" 200 OK
+INFO:     182.226.49.148:50561 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=gjtmu9rQbUGjlI9LAAA6" [accepted]
+INFO:     182.226.49.148:50560 - "GET /socket.io/?EIO=4&transport=polling&t=PpHa6Hr&sid=gjtmu9rQbUGjlI9LAAA6 HTTP/1.1" 200 OK
+INFO:mafia_game:Player added to room room_3715: 하이 (GajA0xM_gSbVmmvcAAA7)
+INFO:mafia_server:Client disconnected: GajA0xM_gSbVmmvcAAA7
+INFO:     64.62.156.108:4716 - "GET / HTTP/1.1" 200 OK
+INFO:     64.62.156.117:62883 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     64.62.156.119:25211 - "GET http%3A//api.ipify.org/?format=json HTTP/1.1" 404 Not Found
+INFO:     64.62.156.113:62195 - "CONNECT www.shadowserver.org%3A443 HTTP/1.1" 404 Not Found
+INFO:     211.231.103.105:35022 - "GET / HTTP/1.1" 200 OK
+INFO:     27.0.238.116:54782 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     27.0.238.117:35346 - "GET / HTTP/1.1" 200 OK
+INFO:     211.231.103.94:54950 - "GET / HTTP/1.1" 200 OK
+INFO:     193.142.146.230:46160 - "GET /login HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     58.235.136.159:48581 - "GET / HTTP/1.0" 200 OK
+INFO:     193.142.146.230:41140 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     109.105.210.52:53138 - "GET / HTTP/1.1" 200 OK
+INFO:     109.105.210.52:53144 - "POST /mcp HTTP/1.1" 404 Not Found
+INFO:     109.105.210.52:53144 - "GET /sse HTTP/1.1" 404 Not Found
+INFO:     109.105.210.55:37580 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     198.235.24.240:55383 - "GET / HTTP/1.0" 200 OK
+INFO:     45.55.78.21:44982 - "GET / HTTP/1.1" 200 OK
+INFO:     45.55.78.21:44988 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     193.142.146.230:37286 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     64.62.156.24:18572 - "GET / HTTP/1.1" 200 OK
+INFO:     64.62.156.29:54973 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     64.62.156.33:6219 - "GET http%3A//api.ipify.org/?format=json HTTP/1.1" 404 Not Found
+INFO:     64.62.156.37:57021 - "CONNECT www.shadowserver.org%3A443 HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     89.42.231.182:32846 - "GET /../../../../../../../../etc/passwd HTTP/1.1" 404 Not Found
+INFO:     89.42.231.182:32848 - "GET /static/link/../../etc/passwd HTTP/1.1" 404 Not Found
+INFO:     89.42.231.182:32852 - "GET /../../../../../../etc/passwd HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.119.146:48144 - "GET / HTTP/1.0" 200 OK
+INFO:     139.162.119.146:48156 - "OPTIONS / HTTP/1.0" 405 Method Not Allowed
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.119.146:35844 - "GET /nice%20ports%2C/Trinity.txt.bak HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.119.146:51930 - "GET /dana-na/nc/nc_gina_ver.txt HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:51934 - "GET /login.php HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:51940 - "GET /user HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:51944 - "GET /%2BCSCOE%2B/logon.html HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:49222 - "GET /dana-cached/hc/HostCheckerInstaller.osx HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.119.146:49312 - "GET /webui HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:49316 - "GET /CFIDE/componentutils/ HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:49326 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.119.146:34754 - "GET /dniapi/userInfos HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:34758 - "GET /human.aspx?arg12=infotech HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:34764 - "GET /api/v2/about HTTP/1.1" 404 Not Found
+INFO:     139.162.119.146:34762 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     18.218.118.203:59950 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     167.94.146.51:53620 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     167.94.146.51:35746 - "GET / HTTP/1.1" 200 OK
+INFO:     167.94.146.51:35754 - "PRI %2A HTTP/2.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     167.94.146.51:35758 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     167.94.146.51:29344 - "GET /.well-known/security.txt HTTP/1.1" 404 Not Found
+INFO:     193.142.146.230:57046 - "GET /login HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     222.102.125.163:51408 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.3.141:45784 - "GET / HTTP/1.0" 200 OK
+INFO:     139.162.3.141:45790 - "OPTIONS / HTTP/1.0" 405 Method Not Allowed
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.3.141:56816 - "GET /nice%20ports%2C/Trinity.txt.bak HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.3.141:47634 - "GET /human.aspx?arg12=infotech HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:47648 - "GET /CFIDE/componentutils/ HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:47662 - "GET /user HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:47666 - "GET /dniapi/userInfos HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:47668 - "GET /api/v2/about HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:47696 - "GET /%2BCSCOE%2B/logon.html HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:37342 - "GET /webui HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:37452 - "GET /login.php HTTP/1.1" 404 Not Found
+INFO:     139.162.3.141:37476 - "GET /dana-na/nc/nc_gina_ver.txt HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     139.162.3.141:37422 - "GET / HTTP/1.1" 200 OK
+INFO:     139.162.3.141:40564 - "GET /dana-cached/hc/HostCheckerInstaller.osx HTTP/1.1" 404 Not Found
+INFO:     193.142.146.230:46090 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     220.117.27.215:34727 - "GET / HTTP/1.1" 200 OK
+INFO:     220.117.27.215:34727 - "GET /socket.io/?EIO=4&transport=polling&t=PpQUijp HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: wt_hZa1a9vNBKj9AAAA9
+INFO:     220.117.27.215:34727 - "POST /socket.io/?EIO=4&transport=polling&t=PpQUikf&sid=Nrg-dnKKmWwxPyYBAAA8 HTTP/1.1" 200 OK
+INFO:     220.117.27.215:40300 - "GET /socket.io/?EIO=4&transport=polling&t=PpQUikg&sid=Nrg-dnKKmWwxPyYBAAA8 HTTP/1.1" 200 OK
+INFO:     220.117.27.215:26154 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=Nrg-dnKKmWwxPyYBAAA8" [accepted]
+INFO:     220.117.27.215:40300 - "GET /socket.io/?EIO=4&transport=polling&t=PpQUikv&sid=Nrg-dnKKmWwxPyYBAAA8 HTTP/1.1" 200 OK
+INFO:     220.117.27.215:34727 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     220.117.27.215:34727 - "GET /socket.io/?EIO=4&transport=polling&t=PpQUilC&sid=Nrg-dnKKmWwxPyYBAAA8 HTTP/1.1" 200 OK
+INFO:mafia_server:Client disconnected: wt_hZa1a9vNBKj9AAAA9
+INFO:     27.0.238.114:35996 - "GET / HTTP/1.1" 200 OK
+INFO:     147.185.132.198:53970 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     65.49.1.38:28008 - "GET / HTTP/1.1" 200 OK
+INFO:     65.49.1.49:43685 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     65.49.1.39:40577 - "CONNECT www.shadowserver.org%3A443 HTTP/1.1" 404 Not Found
+INFO:     193.142.146.230:43930 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     172.236.228.111:42284 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     66.132.153.112:55576 - "GET / HTTP/1.1" 200 OK
+INFO:     66.132.153.112:55624 - "PRI %2A HTTP/2.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     66.132.153.112:55636 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     66.132.153.112:24660 - "GET /wiki HTTP/1.1" 404 Not Found
+INFO:     193.142.146.230:51008 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     119.47.250.158:41821 - "GET / HTTP/1.0" 200 OK
+INFO:     147.185.132.52:52497 - "GET / HTTP/1.0" 200 OK
+INFO:     220.117.27.215:48148 - "GET / HTTP/1.1" 200 OK
+INFO:     220.117.27.215:48148 - "GET /socket.io/?EIO=4&transport=polling&t=PpVlOsC HTTP/1.1" 200 OK
+INFO:mafia_server:Client connected: j_Tz8_At0yfJ9mNWAAA_
+INFO:     220.117.27.215:48148 - "POST /socket.io/?EIO=4&transport=polling&t=PpVlOtI&sid=MUPDS2r4Zqzmn2Y6AAA- HTTP/1.1" 200 OK
+INFO:     220.117.27.215:37850 - "GET /socket.io/?EIO=4&transport=polling&t=PpVlOtJ&sid=MUPDS2r4Zqzmn2Y6AAA- HTTP/1.1" 200 OK
+INFO:     220.117.27.215:38207 - "WebSocket /socket.io/?EIO=4&transport=websocket&sid=MUPDS2r4Zqzmn2Y6AAA-" [accepted]
+INFO:     220.117.27.215:37850 - "GET /socket.io/?EIO=4&transport=polling&t=PpVlOto&sid=MUPDS2r4Zqzmn2Y6AAA- HTTP/1.1" 200 OK
+INFO:     220.117.27.215:37850 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     193.142.146.230:40662 - "GET /login HTTP/1.1" 404 Not Found

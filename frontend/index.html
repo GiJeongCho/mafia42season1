@@ -37,9 +37,108 @@
         ::-webkit-scrollbar-thumb:hover { background: #666; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 엑셀(스프레드시트) 테마 변수 - 완전한 화이트/그린 컨셉 */
+        body.theme-white { background-color: #ffffff; color: #000000; font-family: 'Malgun Gothic', 'Dotum', sans-serif; }
+        
+        /* 모든 카드, 패널, 배경 요소를 강제로 흰색으로 */
+        body.theme-white .card,
+        body.theme-white #host-settings,
+        body.theme-white .bg-gray-800,
+        body.theme-white .bg-gray-900,
+        body.theme-white .bg-gray-700,
+        body.theme-white .bg-gray-600,
+        body.theme-white .bg-black,
+        body.theme-white .bg-\[\#1e1e1e\],
+        body.theme-white .bg-\[\#252525\],
+        body.theme-white .bg-\[\#1a1a1a\],
+        body.theme-white .bg-\[\#151515\],
+        body.theme-white .bg-black\/20,
+        body.theme-white .bg-black\/40,
+        body.theme-white .bg-black\/60,
+        body.theme-white .bg-gray-800\/50,
+        body.theme-white .bg-gray-900\/80,
+        body.theme-white .bg-gray-900\/50,
+        body.theme-white .bg-gray-900\/30 {
+            background-color: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+            color: #000000 !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+
+        /* 버튼 스타일 */
+        body.theme-white .btn { 
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #bbb !important;
+            border-radius: 0 !important;
+            font-weight: normal !important;
+        }
+        body.theme-white .btn:hover { background-color: #f0f0f0 !important; }
+        
+        /* 주요 버튼 (녹색) */
+        body.theme-white .btn-primary { 
+            background-color: #217346 !important; /* 엑셀 초록색 */
+            color: white !important; 
+            border: 1px solid #1e6b41 !important;
+        }
+        body.theme-white .btn-primary:hover { background-color: #1a5c35 !important; }
+
+        /* 입력창 및 선택창 */
+        body.theme-white input,
+        body.theme-white select,
+        body.theme-white textarea {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #ccc !important;
+            border-radius: 0 !important;
+        }
+        body.theme-white input:focus,
+        body.theme-white select:focus {
+            border-color: #217346 !important;
+            outline: none !important;
+        }
+
+        /* 텍스트 색상 강제 조정 */
+        body.theme-white .text-gray-300, 
+        body.theme-white .text-gray-400, 
+        body.theme-white .text-gray-500,
+        body.theme-white .text-white { 
+            color: #333333 !important; 
+        }
+        
+        /* 로비/대기실 리스트 아이템 */
+        body.theme-white li,
+        body.theme-white .chat-entry {
+            background-color: #ffffff !important;
+            border-color: #e0e0e0 !important;
+            color: #000000 !important;
+        }
+
+        /* 시스템 메시지 (노란색 배경 유지하되 테두리로 구분) */
+        body.theme-white .chat-system { 
+            background-color: #fff9db !important;
+            color: #5c4608 !important;
+            border: 1px solid #eee !important;
+            border-left: 3px solid #fcc419 !important;
+        }
+
+        /* 플레이어 액션 리스트 아이템 */
+        body.theme-white #action-players > div {
+            background-color: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+
+        /* 스크롤바 */
+        body.theme-white ::-webkit-scrollbar-thumb { background: #ccc; }
+        body.theme-white ::-webkit-scrollbar-track { background: #f0f0f0; }
+
+        /* 다크모드 기본값 유지를 위한 명시 */
+        body:not(.theme-white) .text-white { color: white; }
     </style>
 </head>
-<body class="p-4 flex flex-col">
+<body class="p-4 flex flex-col transition-colors duration-300">
     <!-- 게임 가이드 모달 -->
     <div id="game-guide" class="fixed inset-0 hidden overflow-y-auto p-4 md:p-10 text-left">
         <div class="bg-[#1a1a1a] p-8 rounded-xl max-w-4xl mx-auto shadow-2xl border border-[#333]">
@@ -230,12 +329,12 @@
                         <h3 class="font-bold mb-2 text-gray-400 uppercase tracking-widest text-xs">참가자 (<span id="player-count">0</span>/12)</h3>
                         <ul id="player-list-lobby" class="flex-1 overflow-y-auto space-y-2 bg-black/20 p-4 rounded-xl border border-gray-800 scrollbar-hide"></ul>
                     </div>
-                    <div id="host-settings" class="hidden bg-[#252525] p-6 rounded-xl border border-red-900/30">
-                        <h3 class="font-bold mb-4 text-red-500">방장 설정</h3>
+                    <div id="host-settings" class="hidden bg-white p-6 rounded-xl border border-gray-300 shadow-lg text-black">
+                        <h3 class="font-bold mb-4 text-red-600">방장 설정</h3>
                         <div class="text-left space-y-4">
                             <label class="block">
-                                <span class="text-xs text-gray-500">시작 상태</span>
-                                <select id="start-state-select" class="w-full bg-gray-900 rounded p-3 text-white border border-gray-700 mt-1 outline-none">
+                                <span class="text-xs text-gray-600 font-bold">시작 상태</span>
+                                <select id="start-state-select" class="w-full bg-gray-50 rounded p-3 text-black border border-gray-300 mt-1 outline-none focus:border-red-500">
                                     <option value="NIGHT">🌙 밤부터 시작</option>
                                     <option value="DAY">☀️ 낮부터 시작</option>
                                 </select>
@@ -313,6 +412,13 @@
                 </div>
             </div>
         </main>
+        
+        <!-- 테마 토글 버튼 (왼쪽 아래) -->
+        <div class="fixed bottom-4 left-4 z-50">
+            <button onclick="toggleTheme()" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg border border-gray-600 transition-all transform hover:scale-110" title="테마 변경 (다크/엑셀)">
+                📊
+            </button>
+        </div>
     </div>
 
     <script>
@@ -467,6 +573,21 @@
         socket.on('system_message', (d) => addLog("시스템", d.message));
         socket.on('action_confirmed', (d) => addLog("시스템", d.message));
         socket.on('mafia_target_sync', (d) => { mafiaTargetSync[d.attacker_id] = d.target_id; updatePlayerActionList(); });
+
+        function toggleTheme() {
+            document.body.classList.toggle('theme-white');
+            const isWhite = document.body.classList.contains('theme-white');
+            localStorage.setItem('mafia42-theme', isWhite ? 'white' : 'dark');
+        }
+
+        // 초기 테마 로드 (기본값: 화이트)
+        if (localStorage.getItem('mafia42-theme') === 'dark') {
+            // 다크모드일 때만 아무것도 안 함 (기본 CSS가 다크모드지만, body class로 제어 필요)
+            document.body.classList.remove('theme-white');
+        } else {
+            // 그 외(처음 접속 or white)는 화이트 테마 적용
+            document.body.classList.add('theme-white');
+        }
     </script>
 </body>
 </html>
