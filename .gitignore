@@ -10,6 +10,8 @@ build/
 dist/
 *.egg-info/
 
+*/nohup.out
+
 # Node.js
 node_modules/
 npm-debug.log*

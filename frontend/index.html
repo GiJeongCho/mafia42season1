@@ -130,6 +130,17 @@
             border: 1px solid #e0e0e0 !important;
         }
 
+        /* 방 목록 아이템 */
+        body.theme-white #room-list > div {
+            background-color: #f8f8f8 !important;
+            border: 1px solid #ddd !important;
+            color: #000 !important;
+        }
+        body.theme-white #room-list > div:hover {
+            background-color: #e8f5e9 !important;
+            border-color: #217346 !important;
+        }
+
         /* 스크롤바 */
         body.theme-white ::-webkit-scrollbar-thumb { background: #ccc; }
         body.theme-white ::-webkit-scrollbar-track { background: #f0f0f0; }
@@ -307,12 +318,21 @@
             <div id="lobby-section" class="card hidden max-w-2xl mx-auto w-full text-center">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">로비</h2>
-                    <button onclick="createRoom()" class="btn btn-primary">➕ 방 만들기</button>
-                </div>
-                <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
-                    <h3 class="font-bold mb-4">방 ID로 참가</h3>
                     <div class="flex gap-2">
-                        <input type="text" id="room-id-input" class="bg-gray-900 text-white p-3 rounded-lg flex-1 border border-gray-700">
+                        <button onclick="refreshRoomList()" class="btn text-xs px-3">🔄 새로고침</button>
+                        <button onclick="createRoom()" class="btn btn-primary">➕ 방 만들기</button>
+                    </div>
+                </div>
+                <div id="room-list-container" class="mb-6">
+                    <h3 class="font-bold mb-3 text-left text-gray-400 uppercase tracking-widest text-xs">방 목록</h3>
+                    <div id="room-list" class="space-y-2 max-h-64 overflow-y-auto scrollbar-hide">
+                        <p id="no-rooms-msg" class="text-gray-500 text-sm py-8">생성된 방이 없습니다.</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                    <h3 class="font-bold mb-3 text-sm">방 ID로 직접 참가</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="room-id-input" class="bg-gray-900 text-white p-3 rounded-lg flex-1 border border-gray-700" placeholder="room_XXXX">
                         <button onclick="joinRoom()" class="btn px-6">참가</button>
                     </div>
                 </div>
@@ -435,7 +455,37 @@
             myNickname = nick;
             document.getElementById('entry-section').classList.add('hidden');
             document.getElementById('lobby-section').classList.remove('hidden');
+            refreshRoomList();
         }
+        function refreshRoomList() { socket.emit('list_rooms', {}); }
+
+        socket.on('room_list', (data) => {
+            const container = document.getElementById('room-list');
+            const noMsg = document.getElementById('no-rooms-msg');
+            if (!container) return;
+            container.innerHTML = '';
+            const joinableRooms = data.filter(r => r.state === 'WAITING');
+            if (joinableRooms.length === 0) {
+                container.innerHTML = '<p id="no-rooms-msg" class="text-gray-500 text-sm py-8">생성된 방이 없습니다.</p>';
+                return;
+            }
+            joinableRooms.forEach(room => {
+                const el = document.createElement('div');
+                el.className = 'flex justify-between items-center p-3 bg-gray-800/60 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-700/80 hover:border-red-600 transition-all';
+                el.onclick = () => joinRoom(room.room_id);
+                el.innerHTML = `
+                    <div class="text-left">
+                        <span class="font-bold text-white text-sm">${room.room_id}</span>
+                        <span class="text-gray-400 text-xs ml-2">방장: ${room.host_name}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-green-400 font-bold">👥 ${room.player_count}/12</span>
+                        <span class="btn btn-primary text-xs px-3 py-1">입장</span>
+                    </div>`;
+                container.appendChild(el);
+            });
+        });
+
         function createRoom() { socket.emit('create_room', {}, (res) => { if (res?.room_id) { currentRoomId = res.room_id; joinRoom(currentRoomId); } }); }
         function joinRoom(roomId) {
             const targetId = roomId || document.getElementById('room-id-input').value.trim();

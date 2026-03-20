@@ -64,8 +64,35 @@ async def disconnect(sid):
                         game.host_id = list(game.players.keys())[0]
                     await broadcast_player_list(room_id)
                     await sio.emit("receive_chat", {"sender": "시스템", "message": f"[{player_name}]님이 방을 나갔습니다.", "type": "system"}, room=room_id)
+            await broadcast_room_list()
         del player_to_room[sid]
     logger.info(f"Client disconnected: {sid}")
+
+async def broadcast_room_list():
+    """로비에 있는 모든 클라이언트에게 방 목록을 전송합니다."""
+    room_list = []
+    for rid, game in rooms.items():
+        host = game.players.get(game.host_id)
+        room_list.append({
+            "room_id": rid,
+            "player_count": len(game.players),
+            "state": game.state.name,
+            "host_name": host.name if host else "???",
+        })
+    await sio.emit("room_list", room_list)
+
+@sio.event
+async def list_rooms(sid, data):
+    room_list = []
+    for rid, game in rooms.items():
+        host = game.players.get(game.host_id)
+        room_list.append({
+            "room_id": rid,
+            "player_count": len(game.players),
+            "state": game.state.name,
+            "host_name": host.name if host else "???",
+        })
+    await sio.emit("room_list", room_list, room=sid)
 
 @sio.event
 async def create_room(sid, data):
@@ -73,6 +100,7 @@ async def create_room(sid, data):
     while room_id in rooms: room_id = f"room_{random.randint(1000, 9999)}"
     rooms[room_id] = MafiaGame(room_id)
     rooms[room_id].host_id = sid
+    await broadcast_room_list()
     return {"room_id": room_id}
 
 @sio.event
@@ -90,6 +118,7 @@ async def join_room(sid, data):
         await sio.emit("room_joined", {"room_id": room_id, "host_id": game.host_id}, room=sid)
         await broadcast_player_list(room_id)
         await sio.emit("receive_chat", {"sender": "시스템", "message": f"[{player_name}]님이 입장했습니다.", "type": "system"}, room=room_id)
+        await broadcast_room_list()
     else:
         await sio.emit("error", {"message": "존재하지 않는 방입니다."}, room=sid)
 
@@ -134,6 +163,7 @@ async def start_game(sid, data):
         game.timer = game.settings["night_duration"] if game.state == GameState.NIGHT else game.settings["day_duration"]
         await sio.emit("game_info", {"state": game.state.name, "day": game.day_count}, room=room_id)
         await broadcast_player_list(room_id)
+        await broadcast_room_list()
     else:
         await sio.emit("error", {"message": "최소 4명의 플레이어가 필요합니다."}, room=sid)
 
