@@ -418,4 +418,4 @@ async def game_loop():
 @app.on_event("startup")
 async def startup_event(): asyncio.create_task(game_loop())
 
-if __name__ == "__main__": uvicorn.run(socket_app, host="0.0.0.0", port=8090)
+if __name__ == "__main__": uvicorn.run(socket_app, host="0.0.0.0", port=4997)
